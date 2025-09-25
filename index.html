@@ -84,35 +84,25 @@
       box-shadow: 0 8px 20px rgba(0,0,0,.25);
       padding: 12px; display: grid; gap: 10px;
     }
-    .card::before {
-      content: ""; position: absolute; inset: -2px; border-radius: 16px; padding: 1px;
+    .card::before { content: ""; position: absolute; inset: -2px; border-radius: 16px; padding: 1px;
       background: conic-gradient(from 180deg, rgba(124,195,255,.5), rgba(107,241,200,.45), rgba(255,209,102,.45), rgba(124,195,255,.5));
       -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-      -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
-    }
+      -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
     .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .badge { font-size: 11px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); opacity: .9; }
     .badge.tier { font-weight: 800; letter-spacing: .4px; }
     .name { font-weight: 800; font-size: 16px; letter-spacing: .2px; }
-    .stat {
-      display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: var(--muted);
-      padding: 6px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,.08);
-      background: #0e1520;
-    }
+    .stat { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: var(--muted);
+      padding: 6px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,.08); background: #0e1520; }
     .stat .v { color: var(--text); }
     .actions { display: flex; gap: 8px; }
 
     /* Boss */
-    .boss {
-      display: grid; gap: 12px;
-    }
-    .boss .hero {
-      display: grid; gap: 10px; padding: 14px; border-radius: 14px;
+    .boss { display: grid; gap: 12px; }
+    .boss .hero { display: grid; gap: 10px; padding: 14px; border-radius: 14px;
       background: radial-gradient(600px 300px at 10% -20%, rgba(37,137,255,.15), transparent 60%),
                   radial-gradient(500px 240px at 120% 10%, rgba(107,241,200,.12), transparent 60%),
-                  #111827;
-      border: 1px solid rgba(255,255,255,.06);
-    }
+                  #111827; border: 1px solid rgba(255,255,255,.06); }
     .boss .title { font-size: 20px; font-weight: 900; letter-spacing: .4px; }
     .hpbar { height: 16px; border-radius: 999px; background: #0d1320; overflow: hidden; border: 1px solid rgba(255,255,255,.08); }
     .hpbar > div { height: 100%; background: linear-gradient(90deg, #ff6b6b, #ffd166); width: 100%; transition: width .15s linear; }
@@ -120,7 +110,6 @@
 
     .toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
     .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
     .empty { color: var(--muted); text-align: center; padding: 20px; border: 1px dashed rgba(255,255,255,.12); border-radius: 12px; }
   </style>
@@ -138,10 +127,16 @@
   <main>
     <!-- LEFT: ALL PLAYERS -->
     <section class="panel" id="allPlayersPanel" style="order:1">
-      <h2>All Players (from Google Sheet)</h2>
+      <h2>All Players (from Google Sheets)</h2>
       <div id="players" class="cards"></div>
       <div id="playersEmpty" class="empty" style="display:none">No players loaded yet.</div>
-      <div class="note">Headers A–G must be: F-Tier, D-Tier, C-Tier, B-Tier, A-Tier, S-Tier, SS-Tier. Row 2 = Health per tier. Row 3 = Damage per tier. Usernames start at row 4.</div>
+      <div class="note">
+        Two-sheet setup:
+        <ul>
+          <li><strong>Players Sheet</strong>: Headers A–G = F-Tier→SS-Tier. Row 2+ = usernames under each tier.</li>
+          <li><strong>Class Stats Sheet</strong>: Same headers. Row 2 = Health per tier. Row 3 = Damage per tier.</li>
+        </ul>
+      </div>
     </section>
 
     <!-- CENTER: BOSS ARENA -->
@@ -180,26 +175,23 @@
   </main>
 
   <script>
-  // === CONFIG ===
-  // Paste your Google Sheet CSV URL here (Published to web -> CSV):
-  const SHEET_URL = "PUT_YOUR_GOOGLE_SHEET_CSV_URL_HERE"; // e.g., https://docs.google.com/spreadsheets/d/XXXX/pub?gid=0&single=true&output=csv
+  // === CONFIG (Two Sheets) ===
+  // 1) Players CSV (published-to-web): usernames under tier columns
+  const SHEET_PLAYERS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMUnfamouCORKPavgJqVoMsSNDyx-emsTNi5dJw2DNx1IcWnPH-I6tgeN9EsAWoLXCUSmWpe5JyfZn/pub?output=csv"; // e.g., https://docs.google.com/spreadsheets/d/XXXX/pub?gid=0&single=true&output=csv
+  // 2) Class Stats CSV (published-to-web): row2=HP per tier, row3=DPS per tier
+  const SHEET_STATS_URL   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRgc7Pm81icSxeJP3dySkafpNEyAElWNXiHUgue3wLcNUsanku5Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
 
   const TIER_ORDER = ["F-Tier", "D-Tier", "C-Tier", "B-Tier", "A-Tier", "S-Tier", "SS-Tier"];
   const TIER_COLORS = {
-    "F-Tier":"#94a3b8", // slate
-    "D-Tier":"#a78bfa", // violet
-    "C-Tier":"#60a5fa", // blue
-    "B-Tier":"#34d399", // green
-    "A-Tier":"#fbbf24", // amber
-    "S-Tier":"#f472b6", // pink
-    "SS-Tier":"#f59e0b"  // gold-ish
+    "F-Tier":"#94a3b8", "D-Tier":"#a78bfa", "C-Tier":"#60a5fa",
+    "B-Tier":"#34d399", "A-Tier":"#fbbf24", "S-Tier":"#f472b6", "SS-Tier":"#f59e0b"
   };
 
   // === STATE ===
   let tiers = {};        // { tier: { hp:number, dps:number, players:[string] } }
   let players = [];      // flat player objects { id, name, tier, hp, dps }
   let teamIds = [];      // player ids currently on team
-  let collectionIds = []; // owned ids (for future expansion); for now we treat team = collection
+  let collectionIds = []; // owned ids
   let cash = 0;
   let bossLevel = 1;
   let boss = null;       // { name, level, maxHp, hp }
@@ -232,44 +224,47 @@
   }
 
   function parseCSV(text) {
-    // simple CSV split (usernames + numbers => safe to split on commas/newlines)
-    const rows = text.trim().split(/\r?\n/).map(r => r.split(',').map(c => c.replace(/^\"|\"$/g,'').trim()));
-    return rows;
+    // simple CSV parser for our sheet shapes
+    return text.trim().split(/\r?\n/).map(r => r.split(',').map(c => c.replace(/^\"|\"$/g,'').trim()));
   }
 
-  function buildFromMatrix(matrix) {
-    if (!matrix.length) throw new Error('Empty sheet');
-    const headers = (matrix[0]||[]).map(h => h.trim());
-    // map header index => tier name (normalized to our canonical names)
-    const cols = headers.map(h => TIER_ORDER.find(t => t.toLowerCase() === h.toLowerCase()) || null);
-
-    // Expect row 2 (index 1) = Health, row 3 (index 2) = Damage per tier
-    const healthRow = matrix[1] || [];
-    const dmgRow = matrix[2] || [];
-
-    // Initialize tiers
-    tiers = {};
-    TIER_ORDER.forEach(t => tiers[t] = { hp: 100, dps: 5, players: [] });
-
-    cols.forEach((tierName, colIdx) => {
-      if (!tierName) return;
-      const hp = parseFloat(healthRow[colIdx]);
-      const dps = parseFloat(dmgRow[colIdx]);
-      if (!Number.isNaN(hp)) tiers[tierName].hp = hp;
-      if (!Number.isNaN(dps)) tiers[tierName].dps = dps;
+  function mapHeaderToTiers(headers) {
+    return headers.map(h => {
+      const norm = (h||'').toString().trim().toLowerCase();
+      return TIER_ORDER.find(t => t.toLowerCase() === norm) || null;
     });
+  }
 
-    // Player rows: start at row 4 if we detected numeric stats on rows 2/3; otherwise row 2
-    const statsLooksNumeric = cols.some((tierName, i)=> tierName && (!Number.isNaN(parseFloat(healthRow[i])) || !Number.isNaN(parseFloat(dmgRow[i]))));
-    const startRow = statsLooksNumeric ? 3 : 1;
+  function buildFromSheets(statsMatrix, playersMatrix) {
+    // --- Stats sheet: row2=HP, row3=DPS ---
+    tiers = {}; TIER_ORDER.forEach(t => tiers[t] = { hp: 100, dps: 5, players: [] });
 
-    for (let r = startRow; r < matrix.length; r++) {
-      const row = matrix[r];
-      for (let c = 0; c < row.length; c++) {
-        const tierName = cols[c]; if (!tierName) continue;
-        const name = (row[c]||'').trim();
-        if (!name) continue;
-        if (!tiers[tierName].players.includes(name)) tiers[tierName].players.push(name);
+    if (statsMatrix && statsMatrix.length >= 3) {
+      const sHeaders = (statsMatrix[0]||[]);
+      const sCols = mapHeaderToTiers(sHeaders);
+      const hpRow = statsMatrix[1] || [];
+      const dpsRow = statsMatrix[2] || [];
+      sCols.forEach((tierName, i) => {
+        if (!tierName) return;
+        const hp = parseFloat(hpRow[i]);
+        const dps = parseFloat(dpsRow[i]);
+        if (!Number.isNaN(hp)) tiers[tierName].hp = hp;
+        if (!Number.isNaN(dps)) tiers[tierName].dps = dps;
+      });
+    }
+
+    // --- Players sheet: row2+ usernames ---
+    if (playersMatrix && playersMatrix.length >= 2) {
+      const pHeaders = (playersMatrix[0]||[]);
+      const pCols = mapHeaderToTiers(pHeaders);
+      for (let r = 1; r < playersMatrix.length; r++) {
+        const row = playersMatrix[r];
+        for (let c = 0; c < row.length; c++) {
+          const tierName = pCols[c]; if (!tierName) continue;
+          const name = (row[c]||'').trim();
+          if (!name) continue;
+          if (!tiers[tierName].players.includes(name)) tiers[tierName].players.push(name);
+        }
       }
     }
 
@@ -302,13 +297,12 @@
     }
     $('#playersEmpty').style.display = 'none';
 
-    // group by tier, keep order
+    // group by tier
     const grouped = Object.fromEntries(TIER_ORDER.map(t => [t, []]));
     players.forEach(p => grouped[p.tier].push(p));
 
     for (const tier of TIER_ORDER) {
       const list = grouped[tier]; if (!list.length) continue;
-      // section header card
       const headerCard = el('div', { className: 'card' });
       const titleRow = el('div', { className: 'row' });
       const hname = el('div', { className: 'name', textContent: `${tier} · ${list.length}` });
@@ -382,18 +376,18 @@
 
   function genBoss(level, teamDps=1) {
     const name = `${pick(BOSS_NAMES)} ${level>=10?"[Ω]":""}`.trim();
-    // target TTK grows slowly with level, base ~18s, +1.5s/level
-    const targetTTK = 18 + level*1.5; // seconds
-    const difficulty = 1 + level*0.18; // scales up ~18% per level
-    const variance = rand(0.9, 1.1);
+    // Gentle scaling: aim ~16s TTK, +1.0s per level; difficulty +8%/level
+    const targetTTK = 16 + level*1.0; // seconds
+    const difficulty = 1 + level*0.08; // scales ~8%/level (not by much)
+    const variance = rand(0.93, 1.07);
     const maxHp = Math.max(50, teamDps * targetTTK * difficulty * variance);
     return { name, level, maxHp: Math.round(maxHp), hp: Math.round(maxHp) };
   }
 
   function rewardFor(level) {
     const base = 0.10;
-    const growth = 0.03 * level; // gentle growth
-    const variance = rand(0.95, 1.05);
+    const growth = 0.015 * level; // very gentle growth per level
+    const variance = rand(0.97, 1.03);
     const val = (base + growth) * variance;
     return Math.round(val * 100)/100; // 2dp
   }
@@ -403,7 +397,7 @@
     $('#bossName').textContent = boss.name;
     $('#bossLevel').textContent = boss.level;
     $('#bossBadge').textContent = `Level ${boss.level}`;
-    $('#bossStats').textContent = `HP ${boss.hp} / ${boss.maxHp}`;
+    $('#bossStats').textContent = `HP ${Math.ceil(boss.hp)} / ${boss.maxHp}`;
     const pct = clamp((boss.hp / boss.maxHp) * 100, 0, 100);
     $('#hpFill').style.width = pct + '%';
   }
@@ -442,11 +436,9 @@
   }
 
   function handleFreeCommon() {
-    // Give one random F-Tier card if not owned
     const f = tiers['F-Tier']?.players || [];
     let candidate = f.length ? pick(f) : null;
     if (!candidate) {
-      // fallback to any tier
       const all = players.map(p=>p.name);
       if (!all.length) return alert('No players in sheet yet.');
       candidate = pick(all);
@@ -471,45 +463,55 @@
     $('#freeCardBtn').onclick = handleFreeCommon;
     $('#resetBtn').onclick = ()=>{ if(confirm('Reset local progress?')){ localStorage.removeItem('cdps.cash'); localStorage.removeItem('cdps.bossLevel'); localStorage.removeItem('cdps.collection'); localStorage.removeItem('cdps.team'); localStorage.removeItem('cdps.boss'); location.reload(); } };
 
-    if (!SHEET_URL || SHEET_URL.startsWith('PUT_')) {
+    const needPlayers = !SHEET_PLAYERS_URL || SHEET_PLAYERS_URL.startsWith('PUT_');
+    const needStats   = !SHEET_STATS_URL   || SHEET_STATS_URL.startsWith('PUT_');
+    if (needPlayers || needStats) {
       $('#playersEmpty').style.display = '';
-      $('#playersEmpty').textContent = '🔧 Set SHEET_URL at top of file to your published CSV link.';
+      $('#playersEmpty').textContent = '🔧 Set SHEET_PLAYERS_URL and SHEET_STATS_URL at top of file to your published CSV links.';
     }
 
     try {
-      if (SHEET_URL && !SHEET_URL.startsWith('PUT_')) {
-        const res = await fetch(SHEET_URL);
-        const txt = await res.text();
-        const matrix = parseCSV(txt);
-        buildFromMatrix(matrix);
+      let statsMatrix, playersMatrix;
+      if (!needStats) {
+        const sTxt = await fetch(SHEET_STATS_URL).then(r=>r.text());
+        statsMatrix = parseCSV(sTxt);
+      }
+      if (!needPlayers) {
+        const pTxt = await fetch(SHEET_PLAYERS_URL).then(r=>r.text());
+        playersMatrix = parseCSV(pTxt);
+      }
+
+      if (playersMatrix || statsMatrix) {
+        buildFromSheets(statsMatrix, playersMatrix);
       } else {
-        // Fallback demo data if URL not provided
-        const demo = [
-          TIER_ORDER,                 // headers
+        // fallback demo for local dev
+        const demoStats = [
+          TIER_ORDER,
           [200, 300, 400, 550, 700, 900, 1200], // HP row
           [5,   8,   12,  18,  24,  35,  50],   // DPS row
+        ];
+        const demoPlayers = [
+          TIER_ORDER,
           ['Finn','','','','','', ''],
           ['Drelhian','Grok','Lauti','Vincent','Saykao','Nova','Astra'],
           ['Mira','','Kai','','','Zed',''],
         ];
-        buildFromMatrix(demo);
+        buildFromSheets(demoStats, demoPlayers);
       }
     } catch (e) {
       console.error(e);
       $('#playersEmpty').style.display = '';
-      $('#playersEmpty').textContent = 'Failed to load CSV. Check that it\'s published and CORS-accessible.';
+      $('#playersEmpty').textContent = 'Failed to load CSV. Check that both CSVs are published and CORS-accessible.';
     }
 
     renderPlayers();
 
-    // First-time free card gate
     if (!collectionIds.length) {
       $('#freeCardBtn').style.display = '';
     } else {
       $('#freeCardBtn').style.display = 'none';
     }
 
-    // If no team yet but you own cards, auto-add first few
     if (!teamIds.length && collectionIds.length) {
       teamIds = collectionIds.slice(0, 3);
     }
