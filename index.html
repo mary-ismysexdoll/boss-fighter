@@ -6,112 +6,59 @@
   <title>Crowd DPS — Boss Rush</title>
   <style>
     :root {
-      --bg: #0b0f14;
-      --panel: #121821;
-      --muted: #8aa0b6;
-      --text: #e9f0f8;
-      --brand: #7cc3ff;
-      --accent: #6bf1c8;
-      --danger: #ff6b6b;
-      --gold: #ffd166;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius: 16px;
+      --bg:#0b0f14; --panel:#121821; --muted:#8aa0b6; --text:#e9f0f8;
+      --brand:#7cc3ff; --accent:#6bf1c8; --danger:#ff6b6b; --gold:#ffd166;
+      --shadow:0 10px 30px rgba(0,0,0,.35); --radius:16px;
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
-      color: var(--text);
-      background: radial-gradient(1200px 800px at 20% -10%, #112131 0%, var(--bg) 60%),
-                  radial-gradient(1000px 600px at 120% 10%, #182436 0%, transparent 60%),
-                  var(--bg);
-      min-height: 100vh;
-    }
-    header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 20px; gap: 16px;
-      position: sticky; top: 0; backdrop-filter: blur(8px);
-      background: linear-gradient(180deg, rgba(10,14,20,.85), rgba(10,14,20,.55));
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      z-index: 5;
-    }
-    .title { font-weight: 800; letter-spacing: .4px; }
-    .title span { opacity: .7; font-weight: 600; }
-    .pill {
-      display: inline-flex; align-items: center; gap: 10px;
-      background: #0f1722; border: 1px solid rgba(255,255,255,.08);
-      padding: 10px 14px; border-radius: 999px; box-shadow: var(--shadow);
-      font-weight: 600; color: var(--muted);
-    }
-    .pill .value { color: var(--text); }
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center;
-      padding: 10px 14px; border: 1px solid rgba(255,255,255,.1);
-      border-radius: 10px; background: linear-gradient(180deg, #1a2332, #121a26);
-      color: var(--text); cursor: pointer; user-select: none; font-weight: 700;
-      box-shadow: var(--shadow);
-      transition: transform .05s ease, filter .2s ease, background .2s ease;
-    }
-    .btn.small { padding: 8px 10px; font-size: 12px; }
-    .btn:hover { filter: brightness(1.1); }
-    .btn:active { transform: translateY(1px) scale(.99); }
-    .btn.brand { background: linear-gradient(180deg, #2589ff, #1761c8); border-color: #2a66b8; }
-    .btn.neon { background: linear-gradient(180deg, #1f3b3b, #142626); border-color: #2e6f68; color: #b7fff0; }
-
-    main {
-      display: grid; gap: 18px; padding: 18px; max-width: 1400px; margin: 0 auto;
-      grid-template-columns: 1fr minmax(420px, 520px) 1fr;
-    }
-    @media (max-width: 1100px) {
-      main { grid-template-columns: 1fr; }
-      .panel { order: unset !important; }
-    }
-    .panel {
-      background: linear-gradient(180deg, #0f1520, #0b1018);
-      border: 1px solid rgba(255,255,255,.07);
-      border-radius: var(--radius); box-shadow: var(--shadow);
-      padding: 16px; min-height: 120px;
-    }
-    .panel h2 { margin: 0 0 10px; font-size: 16px; font-weight: 800; letter-spacing: .3px; color: var(--muted); }
-
-    /* Cards */
-    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
-    .card {
-      position: relative; overflow: hidden; border-radius: 14px;
-      background: linear-gradient(180deg, rgba(22,30,45,.9), rgba(16,20,30,.9));
-      border: 1px solid rgba(255,255,255,.05);
-      box-shadow: 0 8px 20px rgba(0,0,0,.25);
-      padding: 12px; display: grid; gap: 10px;
-    }
-    .card::before { content: ""; position: absolute; inset: -2px; border-radius: 16px; padding: 1px;
-      background: conic-gradient(from 180deg, rgba(124,195,255,.5), rgba(107,241,200,.45), rgba(255,209,102,.45), rgba(124,195,255,.5));
-      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-      -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
-    .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .badge { font-size: 11px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); opacity: .9; }
-    .badge.tier { font-weight: 800; letter-spacing: .4px; }
-    .name { font-weight: 800; font-size: 16px; letter-spacing: .2px; }
-    .stat { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: var(--muted);
-      padding: 6px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,.08); background: #0e1520; }
-    .stat .v { color: var(--text); }
-    .actions { display: flex; gap: 8px; }
-
-    /* Boss */
-    .boss { display: grid; gap: 12px; }
-    .boss .hero { display: grid; gap: 10px; padding: 14px; border-radius: 14px;
-      background: radial-gradient(600px 300px at 10% -20%, rgba(37,137,255,.15), transparent 60%),
-                  radial-gradient(500px 240px at 120% 10%, rgba(107,241,200,.12), transparent 60%),
-                  #111827; border: 1px solid rgba(255,255,255,.06); }
-    .boss .title { font-size: 20px; font-weight: 900; letter-spacing: .4px; }
-    .hpbar { height: 16px; border-radius: 999px; background: #0d1320; overflow: hidden; border: 1px solid rgba(255,255,255,.08); }
-    .hpbar > div { height: 100%; background: linear-gradient(90deg, #ff6b6b, #ffd166); width: 100%; transition: width .15s linear; }
-    .muted { color: var(--muted); }
-
-    .toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
-    .empty { color: var(--muted); text-align: center; padding: 20px; border: 1px dashed rgba(255,255,255,.12); border-radius: 12px; }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans";
+      color:var(--text);
+      background:radial-gradient(1200px 800px at 20% -10%,#112131 0%,var(--bg) 60%),
+                 radial-gradient(1000px 600px at 120% 10%,#182436 0%,transparent 60%),var(--bg);}
+    header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;gap:16px;
+      position:sticky;top:0;backdrop-filter:blur(8px);
+      background:linear-gradient(180deg,rgba(10,14,20,.85),rgba(10,14,20,.55));
+      border-bottom:1px solid rgba(255,255,255,.06);z-index:5}
+    .title{font-weight:800;letter-spacing:.4px}.title span{opacity:.7;font-weight:600}
+    .pill{display:inline-flex;align-items:center;gap:10px;background:#0f1722;border:1px solid rgba(255,255,255,.08);
+      padding:10px 14px;border-radius:999px;box-shadow:var(--shadow);font-weight:600;color:var(--muted)}
+    .pill .value{color:var(--text)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border:1px solid rgba(255,255,255,.1);
+      border-radius:10px;background:linear-gradient(180deg,#1a2332,#121a26);color:var(--text);cursor:pointer;user-select:none;
+      font-weight:700;box-shadow:var(--shadow);transition:transform .05s ease,filter .2s ease,background .2s ease}
+    .btn.small{padding:8px 10px;font-size:12px}.btn:hover{filter:brightness(1.1)}.btn:active{transform:translateY(1px) scale(.99)}
+    .btn.brand{background:linear-gradient(180deg,#2589ff,#1761c8);border-color:#2a66b8}
+    .btn.neon{background:linear-gradient(180deg,#1f3b3b,#142626);border-color:#2e6f68;color:#b7fff0}
+    main{display:grid;gap:18px;padding:18px;max-width:1400px;margin:0 auto;grid-template-columns:1fr minmax(420px,520px) 1fr}
+    @media (max-width:1100px){main{grid-template-columns:1fr}.panel{order:unset!important}}
+    .panel{background:linear-gradient(180deg,#0f1520,#0b1018);border:1px solid rgba(255,255,255,.07);
+      border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;min-height:120px}
+    .panel h2{margin:0 0 10px;font-size:16px;font-weight:800;letter-spacing:.3px;color:var(--muted)}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+    .card{position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(180deg,rgba(22,30,45,.9),rgba(16,20,30,.9));
+      border:1px solid rgba(255,255,255,.05);box-shadow:0 8px 20px rgba(0,0,0,.25);padding:12px;display:grid;gap:10px}
+    .card::before{content:\"\";position:absolute;inset:-2px;border-radius:16px;padding:1px;
+      background:conic-gradient(from 180deg,rgba(124,195,255,.5),rgba(107,241,200,.45),rgba(255,209,102,.45),rgba(124,195,255,.5));
+      -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .badge{font-size:11px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);opacity:.9}
+    .badge.tier{font-weight:800;letter-spacing:.4px}
+    .name{font-weight:800;font-size:16px;letter-spacing:.2px}
+    .stat{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--muted);padding:6px 8px;border-radius:8px;
+      border:1px solid rgba(255,255,255,.08);background:#0e1520}
+    .stat .v{color:var(--text)} .actions{display:flex;gap:8px}
+    .boss{display:grid;gap:12px}
+    .boss .hero{display:grid;gap:10px;padding:14px;border-radius:14px;
+      background:radial-gradient(600px 300px at 10% -20%,rgba(37,137,255,.15),transparent 60%),
+                 radial-gradient(500px 240px at 120% 10%,rgba(107,241,200,.12),transparent 60%),#111827;
+      border:1px solid rgba(255,255,255,.06)}
+    .boss .title{font-size:20px;font-weight:900;letter-spacing:.4px}
+    .hpbar{height:16px;border-radius:999px;background:#0d1320;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+    .hpbar>div{height:100%;background:linear-gradient(90deg,#ff6b6b,#ffd166);width:100%;transition:width .15s linear}
+    .muted{color:var(--muted)} .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .note{color:var(--muted);font-size:12px;margin-top:6px}
+    .empty{color:var(--muted);text-align:center;padding:20px;border:1px dashed rgba(255,255,255,.12);border-radius:12px}
   </style>
 </head>
 <body>
@@ -120,53 +67,42 @@
     <div class="toolbar">
       <div class="pill">Cash: <span class="value" id="cash">$0.00</span></div>
       <div class="pill">Boss Lvl: <span class="value" id="bossLevel">1</span></div>
-      <button id="resetBtn" class="btn small" title="Reset local progress">Reset</button>
+      <button id="resetBtn" class="btn small">Reset</button>
     </div>
   </header>
 
   <main>
-    <!-- LEFT: ALL PLAYERS -->
     <section class="panel" id="allPlayersPanel" style="order:1">
       <h2>All Players (from Google Sheets)</h2>
       <div id="players" class="cards"></div>
       <div id="playersEmpty" class="empty" style="display:none">No players loaded yet.</div>
-      <div class="note">
-        Two-sheet setup:
-        <ul>
-          <li><strong>Players Sheet</strong>: Headers A–G = F-Tier→SS-Tier. Row 2+ = usernames under each tier.</li>
-          <li><strong>Class Stats Sheet</strong>: Same headers. Row 2 = Health per tier. Row 3 = Damage per tier.</li>
-        </ul>
-      </div>
+      <div class="note">Players sheet: row 1 = F-Tier..SS-Tier, row 2+ = usernames. Stats sheet: row 1 = same headers; row 2 = HP per tier; row 3 = DPS per tier.</div>
     </section>
 
-    <!-- CENTER: BOSS ARENA -->
     <section class="panel" id="bossPanel" style="order:0">
       <h2>Boss Arena</h2>
       <div class="boss">
         <div class="hero">
-          <div class="row" style="justify-content: space-between; align-items: baseline;">
-            <div>
-              <div class="title" id="bossName">—</div>
-              <div class="muted" id="bossStats">HP — / —</div>
-            </div>
+          <div class="row" style="justify-content:space-between;align-items:baseline">
+            <div><div class="title" id="bossName">—</div><div class="muted" id="bossStats">HP — / —</div></div>
             <div class="badge" id="bossBadge">Level 1</div>
           </div>
           <div class="hpbar"><div id="hpFill" style="width:100%"></div></div>
           <div class="grid2">
-            <div class="pill" title="Sum of DPS from your team">Your DPS: <span class="value" id="yourDPS">0</span></div>
-            <div class="pill" title="Sum of HP from your team">Your HP: <span class="value" id="yourHP">0</span></div>
+            <div class="pill">Your DPS: <span class="value" id="yourDPS">0</span></div>
+            <div class="pill">Your HP: <span class="value" id="yourHP">0</span></div>
           </div>
           <div class="toolbar">
             <button id="fightBtn" class="btn brand">Start Fight</button>
-            <button id="newBossBtn" class="btn" title="Generate next harder boss">New Boss</button>
+            <button id="newBossBtn" class="btn">New Boss</button>
             <button id="freeCardBtn" class="btn neon" title="First-time bonus: random F-Tier">Get Free Common Card</button>
+            <button id="recruitBtn" class="btn" title="Roll a random card by rarity">Recruit (Roll)</button>
           </div>
           <div class="note" id="fightNote">Win to earn cash. Rewards grow slowly as bosses scale up.</div>
         </div>
       </div>
     </section>
 
-    <!-- RIGHT: YOUR TEAM -->
     <section class="panel" id="teamPanel" style="order:2">
       <h2>Your Team</h2>
       <div id="team" class="cards"></div>
@@ -175,353 +111,287 @@
   </main>
 
   <script>
-  // === CONFIG (Two Sheets) ===
-  // 1) Players CSV (published-to-web): usernames under tier columns
-  const SHEET_PLAYERS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMUnfamouCORKPavgJqVoMsSNDyx-emsTNi5dJw2DNx1IcWnPH-I6tgeN9EsAWoLXCUSmWpe5JyfZn/pub?output=csv"; // e.g., https://docs.google.com/spreadsheets/d/XXXX/pub?gid=0&single=true&output=csv
-  // 2) Class Stats CSV (published-to-web): row2=HP per tier, row3=DPS per tier
+  // === CONFIG ===
+  const SHEET_PLAYERS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMUnfamouCORKPavgJqVoMsSNDyx-emsTNi5dJw2DNx1IcWnPH-I6tgeN9EsAWoLXCUSmWpe5JyfZn/pub?output=csv";
   const SHEET_STATS_URL   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRgc7Pm81icSxeJP3dySkafpNEyAElWNXiHUgue3wLcNUsanku5Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
 
-  const TIER_ORDER = ["F-Tier", "D-Tier", "C-Tier", "B-Tier", "A-Tier", "S-Tier", "SS-Tier"];
+  const RECRUIT_COST = 0.00; // set >0 to charge per roll, e.g., 0.25
+
+  const TIER_ORDER = ["F-Tier","D-Tier","C-Tier","B-Tier","A-Tier","S-Tier","SS-Tier"];
   const TIER_COLORS = {
-    "F-Tier":"#94a3b8", "D-Tier":"#a78bfa", "C-Tier":"#60a5fa",
-    "B-Tier":"#34d399", "A-Tier":"#fbbf24", "S-Tier":"#f472b6", "SS-Tier":"#f59e0b"
+    "F-Tier":"#94a3b8","D-Tier":"#a78bfa","C-Tier":"#60a5fa",
+    "B-Tier":"#34d399","A-Tier":"#fbbf24","S-Tier":"#f472b6","SS-Tier":"#f59e0b"
   };
 
+  // rarity weights for rolls
+  const TIER_WEIGHTS = { "F-Tier":0.45,"D-Tier":0.20,"C-Tier":0.14,"B-Tier":0.09,"A-Tier":0.06,"S-Tier":0.04,"SS-Tier":0.02 };
+
   // === STATE ===
-  let tiers = {};        // { tier: { hp:number, dps:number, players:[string] } }
-  let players = [];      // flat player objects { id, name, tier, hp, dps }
-  let teamIds = [];      // player ids currently on team
-  let collectionIds = []; // owned ids
+  let tiers = {};            // { tier: { hp, dps, players[] } }
+  let players = [];          // [{id,name,tier,hp,dps}]
+  let teamIds = [];
+  let collectionIds = [];
   let cash = 0;
   let bossLevel = 1;
-  let boss = null;       // { name, level, maxHp, hp }
+  let boss = null;
   let fighting = false;
   let fightTimer = null;
 
   // === UTIL ===
-  const $ = sel => document.querySelector(sel);
-  const el = (tag, props={}) => Object.assign(document.createElement(tag), props);
-  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const $ = s => document.querySelector(s);
+  const el = (t,p={}) => Object.assign(document.createElement(t), p);
+  const clamp = (v,l,h)=>Math.max(l,Math.min(h,v));
   const fmtCash = v => `$${Number(v).toFixed(2)}`;
   const fmtNum = v => (Math.round(v*100)/100).toString();
   const rand = (a=0,b=1)=> a + Math.random()*(b-a);
   const pick = arr => arr[Math.floor(Math.random()*arr.length)];
-  const idFrom = name => name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  const idFrom = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
 
-  function save() {
+  function save(){
     localStorage.setItem('cdps.cash', String(cash));
     localStorage.setItem('cdps.bossLevel', String(bossLevel));
     localStorage.setItem('cdps.collection', JSON.stringify(collectionIds));
     localStorage.setItem('cdps.team', JSON.stringify(teamIds));
     if (boss) localStorage.setItem('cdps.boss', JSON.stringify(boss));
   }
-  function load() {
-    cash = parseFloat(localStorage.getItem('cdps.cash')||'0') || 0;
-    bossLevel = parseInt(localStorage.getItem('cdps.bossLevel')||'1') || 1;
+  function load(){
+    cash = parseFloat(localStorage.getItem('cdps.cash')||'0')||0;
+    bossLevel = parseInt(localStorage.getItem('cdps.bossLevel')||'1')||1;
     collectionIds = JSON.parse(localStorage.getItem('cdps.collection')||'[]');
     teamIds = JSON.parse(localStorage.getItem('cdps.team')||'[]');
-    try { boss = JSON.parse(localStorage.getItem('cdps.boss')||'null'); } catch { boss = null; }
+    try{ boss = JSON.parse(localStorage.getItem('cdps.boss')||'null'); }catch{ boss=null; }
   }
 
-  function parseCSV(text) {
-    // simple CSV parser for our sheet shapes
+  function parseCSV(text){
     return text.trim().split(/\r?\n/).map(r => r.split(',').map(c => c.replace(/^\"|\"$/g,'').trim()));
   }
 
-  function mapHeaderToTiers(headers) {
-    return headers.map(h => {
-      const norm = (h||'').toString().trim().toLowerCase();
-      return TIER_ORDER.find(t => t.toLowerCase() === norm) || null;
+  // build from two CSVs
+  function buildFromTwoMatrices(playersMatrix, statsMatrix){
+    const headersP = (playersMatrix[0]||[]).map(h=>h.trim());
+    const headersS = (statsMatrix[0]||[]).map(h=>h.trim());
+    const colsP = headersP.map(h=> TIER_ORDER.find(t=>t.toLowerCase()===h.toLowerCase()) || null);
+    const colsS = headersS.map(h=> TIER_ORDER.find(t=>t.toLowerCase()===h.toLowerCase()) || null);
+
+    tiers = {}; TIER_ORDER.forEach(t=> tiers[t] = { hp:100, dps:5, players:[] });
+
+    const healthRow = statsMatrix[1] || [];
+    const dmgRow    = statsMatrix[2] || [];
+    colsS.forEach((tierName,i)=>{
+      if (!tierName) return;
+      const hp  = parseFloat(healthRow[i]);
+      const dps = parseFloat(dmgRow[i]);
+      if (!Number.isNaN(hp))  tiers[tierName].hp  = hp;
+      if (!Number.isNaN(dps)) tiers[tierName].dps = dps;
     });
-  }
 
-  function buildFromSheets(statsMatrix, playersMatrix) {
-    // --- Stats sheet: row2=HP, row3=DPS ---
-    tiers = {}; TIER_ORDER.forEach(t => tiers[t] = { hp: 100, dps: 5, players: [] });
-
-    if (statsMatrix && statsMatrix.length >= 3) {
-      const sHeaders = (statsMatrix[0]||[]);
-      const sCols = mapHeaderToTiers(sHeaders);
-      const hpRow = statsMatrix[1] || [];
-      const dpsRow = statsMatrix[2] || [];
-      sCols.forEach((tierName, i) => {
-        if (!tierName) return;
-        const hp = parseFloat(hpRow[i]);
-        const dps = parseFloat(dpsRow[i]);
-        if (!Number.isNaN(hp)) tiers[tierName].hp = hp;
-        if (!Number.isNaN(dps)) tiers[tierName].dps = dps;
-      });
-    }
-
-    // --- Players sheet: row2+ usernames ---
-    if (playersMatrix && playersMatrix.length >= 2) {
-      const pHeaders = (playersMatrix[0]||[]);
-      const pCols = mapHeaderToTiers(pHeaders);
-      for (let r = 1; r < playersMatrix.length; r++) {
-        const row = playersMatrix[r];
-        for (let c = 0; c < row.length; c++) {
-          const tierName = pCols[c]; if (!tierName) continue;
-          const name = (row[c]||'').trim();
-          if (!name) continue;
-          if (!tiers[tierName].players.includes(name)) tiers[tierName].players.push(name);
-        }
+    for (let r=1; r<playersMatrix.length; r++){
+      const row = playersMatrix[r];
+      for (let c=0; c<row.length; c++){
+        const t = colsP[c]; if (!t) continue;
+        const name = (row[c]||'').trim(); if (!name) continue;
+        if (!tiers[t].players.includes(name)) tiers[t].players.push(name);
       }
     }
 
-    // Build flat players list with stats from tier
     players = [];
-    for (const t of TIER_ORDER) {
+    for (const t of TIER_ORDER){
       const baseHp = tiers[t].hp, baseDps = tiers[t].dps;
-      for (const name of tiers[t].players) {
-        players.push({ id: idFrom(name+"-"+t), name, tier: t, hp: baseHp, dps: baseDps });
+      for (const name of tiers[t].players){
+        players.push({ id:idFrom(name+"-"+t), name, tier:t, hp:baseHp, dps:baseDps });
       }
     }
   }
 
-  // === UI RENDER ===
-  function tierBadge(tier) {
-    const b = el('span', { className: 'badge tier' });
-    b.textContent = tier;
-    b.style.borderColor = TIER_COLORS[tier] || 'rgba(255,255,255,.2)';
-    b.style.color = TIER_COLORS[tier] || '#cbd5e1';
-    b.style.background = 'rgba(255,255,255,.03)';
+  // UI
+  function tierBadge(tier){
+    const b = el('span',{className:'badge tier'}); b.textContent=tier;
+    b.style.borderColor = TIER_COLORS[tier]||'rgba(255,255,255,.2)';
+    b.style.color = TIER_COLORS[tier]||'#cbd5e1'; b.style.background='rgba(255,255,255,.03)';
     return b;
   }
 
-  function renderPlayers() {
-    const wrap = $('#players');
-    wrap.innerHTML = '';
-    if (!players.length) {
-      $('#playersEmpty').style.display = '';
-      return;
-    }
-    $('#playersEmpty').style.display = 'none';
+  function renderPlayers(){
+    const wrap = $('#players'); wrap.innerHTML='';
+    if (!players.length){ $('#playersEmpty').style.display=''; return; }
+    $('#playersEmpty').style.display='none';
 
-    // group by tier
-    const grouped = Object.fromEntries(TIER_ORDER.map(t => [t, []]));
-    players.forEach(p => grouped[p.tier].push(p));
+    const grouped = Object.fromEntries(TIER_ORDER.map(t=>[t,[]]));
+    players.forEach(p=> grouped[p.tier].push(p));
 
-    for (const tier of TIER_ORDER) {
+    for (const tier of TIER_ORDER){
       const list = grouped[tier]; if (!list.length) continue;
-      const headerCard = el('div', { className: 'card' });
-      const titleRow = el('div', { className: 'row' });
-      const hname = el('div', { className: 'name', textContent: `${tier} · ${list.length}` });
-      titleRow.append(hname, tierBadge(tier));
-      headerCard.append(titleRow);
+      const headerCard = el('div',{className:'card'});
+      const titleRow = el('div',{className:'row'});
+      const hname = el('div',{className:'name', textContent:`${tier} · ${list.length}`});
+      titleRow.append(hname, tierBadge(tier)); headerCard.append(titleRow);
       wrap.append(headerCard);
-
-      list.forEach(p => wrap.append(playerCard(p, 'add')));
+      list.forEach(p=> wrap.append(playerCard(p, 'add')));
     }
   }
 
-  function playerCard(p, mode='add') {
-    const card = el('div', { className: 'card' });
-    const top = el('div', { className: 'row' });
-    const name = el('div', { className: 'name', textContent: p.name });
-    const badge = tierBadge(p.tier);
-    top.append(name, badge);
+  function playerCard(p, mode='add'){
+    const card = el('div',{className:'card'});
+    const top = el('div',{className:'row'});
+    const name = el('div',{className:'name', textContent:p.name});
+    const badge = tierBadge(p.tier); top.append(name,badge);
 
-    const stats = el('div', { className: 'row' });
-    const s1 = el('div', { className: 'stat', innerHTML: `HP <span class="v">${fmtNum(p.hp)}</span>` });
-    const s2 = el('div', { className: 'stat', innerHTML: `DPS <span class="v">${fmtNum(p.dps)}</span>` });
-    stats.append(s1, s2);
+    const stats = el('div',{className:'row'});
+    const s1 = el('div',{className:'stat',innerHTML:`HP <span class="v">${fmtNum(p.hp)}</span>`});
+    const s2 = el('div',{className:'stat',innerHTML:`DPS <span class="v">${fmtNum(p.dps)}</span>`});
+    stats.append(s1,s2);
 
-    const actions = el('div', { className: 'actions' });
-    const btn = el('button', { className:'btn small' });
-    if (mode === 'add') {
-      btn.textContent = teamIds.includes(p.id) ? 'On Team' : 'Add to Team';
-      btn.disabled = teamIds.includes(p.id);
-      btn.onclick = () => { addToTeam(p.id); };
+    const actions = el('div',{className:'actions'});
+    const btn = el('button',{className:'btn small'});
+    if (mode==='add'){
+      const owned = teamIds.includes(p.id) || collectionIds.includes(p.id);
+      btn.textContent = owned ? 'Owned' : 'Add to Team';
+      btn.disabled = owned;
+      btn.onclick = ()=> addToTeam(p.id);
     } else {
-      btn.textContent = 'Remove';
-      btn.onclick = () => { removeFromTeam(p.id); };
+      btn.textContent='Remove'; btn.onclick = ()=> removeFromTeam(p.id);
     }
     actions.append(btn);
 
-    card.append(top, stats, actions);
+    card.append(top,stats,actions);
     return card;
   }
 
-  function renderTeam() {
-    const wrap = $('#team');
-    wrap.innerHTML = '';
-    const team = teamIds.map(id => players.find(p => p.id===id)).filter(Boolean);
-    if (!team.length) {
-      $('#teamEmpty').style.display = '';
-    } else {
-      $('#teamEmpty').style.display = 'none';
-      team.forEach(p => wrap.append(playerCard(p, 'remove')));
+  function renderTeam(){
+    const wrap = $('#team'); wrap.innerHTML='';
+    const team = teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean);
+    if (!team.length){ $('#teamEmpty').style.display=''; } else {
+      $('#teamEmpty').style.display='none'; team.forEach(p=> wrap.append(playerCard(p,'remove')));
     }
-
     const dps = team.reduce((a,p)=>a+p.dps,0);
     const hp  = team.reduce((a,p)=>a+p.hp,0);
     $('#yourDPS').textContent = fmtNum(dps);
-    $('#yourHP').textContent = fmtNum(hp);
+    $('#yourHP').textContent  = fmtNum(hp);
   }
 
-  function addToTeam(id) {
+  function addToTeam(id){
     if (!collectionIds.includes(id)) collectionIds.push(id);
     if (!teamIds.includes(id)) teamIds.push(id);
     save(); renderPlayers(); renderTeam();
   }
-  function removeFromTeam(id) {
+  function removeFromTeam(id){
     teamIds = teamIds.filter(x=>x!==id);
     save(); renderPlayers(); renderTeam();
   }
 
-  // === BOSS ===
-  const BOSS_NAMES = [
-    'Rust-Eaten Golem','Gelatinous Overmind','Cave Hydra','Skull Furnace','Storm Djinn','Ancient Treant','Hollow Colossus','Obsidian Wyrm','Clockwork Behemoth','Astral Leech'
-  ];
+  // Boss
+  const BOSS_NAMES = ['Rust-Eaten Golem','Gelatinous Overmind','Cave Hydra','Skull Furnace','Storm Djinn','Ancient Treant','Hollow Colossus','Obsidian Wyrm','Clockwork Behemoth','Astral Leech'];
 
-  function genBoss(level, teamDps=1) {
+  function genBoss(level, teamDps=1){
     const name = `${pick(BOSS_NAMES)} ${level>=10?"[Ω]":""}`.trim();
-    // Gentle scaling: aim ~16s TTK, +1.0s per level; difficulty +8%/level
-    const targetTTK = 16 + level*1.0; // seconds
-    const difficulty = 1 + level*0.08; // scales ~8%/level (not by much)
-    const variance = rand(0.93, 1.07);
+    const targetTTK = 18 + level*1.5;
+    const difficulty = 1 + level*0.18;
+    const variance = rand(0.9,1.1);
     const maxHp = Math.max(50, teamDps * targetTTK * difficulty * variance);
-    return { name, level, maxHp: Math.round(maxHp), hp: Math.round(maxHp) };
+    return { name, level, maxHp:Math.round(maxHp), hp:Math.round(maxHp) };
   }
-
-  function rewardFor(level) {
-    const base = 0.10;
-    const growth = 0.015 * level; // very gentle growth per level
-    const variance = rand(0.97, 1.03);
-    const val = (base + growth) * variance;
-    return Math.round(val * 100)/100; // 2dp
+  function rewardFor(level){
+    const base=0.10, growth=0.03*level, variance=rand(0.95,1.05);
+    return Math.round((base+growth)*variance*100)/100;
   }
-
-  function renderBoss() {
+  function renderBoss(){
     if (!boss) return;
     $('#bossName').textContent = boss.name;
     $('#bossLevel').textContent = boss.level;
     $('#bossBadge').textContent = `Level ${boss.level}`;
     $('#bossStats').textContent = `HP ${Math.ceil(boss.hp)} / ${boss.maxHp}`;
-    const pct = clamp((boss.hp / boss.maxHp) * 100, 0, 100);
-    $('#hpFill').style.width = pct + '%';
+    $('#hpFill').style.width = clamp((boss.hp/boss.maxHp)*100,0,100)+'%';
   }
-
-  function newBoss() {
-    const team = teamIds.map(id => players.find(p => p.id===id)).filter(Boolean);
+  function newBoss(){
+    const team = teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean);
     const dps = Math.max(1, team.reduce((a,p)=>a+p.dps,0));
-    boss = genBoss(bossLevel, dps);
-    save(); renderBoss();
+    boss = genBoss(bossLevel, dps); save(); renderBoss();
   }
-
-  function startFight() {
+  function startFight(){
     if (fighting || !boss) return;
-    const team = teamIds.map(id => players.find(p => p.id===id)).filter(Boolean);
+    const team = teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean);
     const dps = team.reduce((a,p)=>a+p.dps,0);
-    if (dps <= 0) { alert('Your team has 0 DPS. Add at least one card.'); return; }
-
-    fighting = true;
-    $('#fightBtn').disabled = true;
-    $('#newBossBtn').disabled = true;
-
-    const tickMs = 100; // 0.1s
-    fightTimer = setInterval(()=>{
-      boss.hp = Math.max(0, boss.hp - dps * (tickMs/1000));
-      renderBoss();
-      if (boss.hp <= 0) {
-        clearInterval(fightTimer); fighting = false; $('#fightBtn').disabled = false; $('#newBossBtn').disabled = false;
-        const reward = rewardFor(boss.level);
-        cash += reward;
-        bossLevel += 1;
-        save();
-        $('#cash').textContent = fmtCash(cash);
-        $('#fightNote').textContent = `Victory! You earned ${fmtCash(reward)}.`;
+    if (dps<=0){ alert('Your team has 0 DPS. Add at least one card.'); return; }
+    fighting=true; $('#fightBtn').disabled=true; $('#newBossBtn').disabled=true;
+    const tick=100;
+    fightTimer=setInterval(()=>{
+      boss.hp=Math.max(0,boss.hp - dps*(tick/1000)); renderBoss();
+      if (boss.hp<=0){
+        clearInterval(fightTimer); fighting=false; $('#fightBtn').disabled=false; $('#newBossBtn').disabled=false;
+        const reward=rewardFor(boss.level); cash+=reward; bossLevel+=1; save();
+        $('#cash').textContent=fmtCash(cash); $('#fightNote').textContent=`Victory! You earned ${fmtCash(reward)}.`;
       }
-    }, tickMs);
+    },tick);
   }
 
-  function handleFreeCommon() {
+  // Free common
+  function handleFreeCommon(){
     const f = tiers['F-Tier']?.players || [];
     let candidate = f.length ? pick(f) : null;
-    if (!candidate) {
-      const all = players.map(p=>p.name);
-      if (!all.length) return alert('No players in sheet yet.');
+    if (!candidate){
+      const all = players.map(p=>p.name); if (!all.length) return alert('No players in sheet yet.');
       candidate = pick(all);
     }
-    const p = players.find(x => x.name === candidate);
+    const p = players.find(x=> x.name===candidate && x.tier==='F-Tier') || players.find(x=> x.name===candidate);
     if (!p) return alert('Could not find a card to grant.');
-    if (!collectionIds.includes(p.id)) collectionIds.push(p.id);
-    if (!teamIds.includes(p.id)) teamIds.push(p.id);
-    save(); renderPlayers(); renderTeam();
-    $('#freeCardBtn').style.display = 'none';
+    if (collectionIds.includes(p.id)) { $('#fightNote').textContent='Common already owned.'; return; }
+    addToTeam(p.id);
+    $('#freeCardBtn').style.display='none';
     $('#fightNote').textContent = `Granted free common card: ${p.name}!`;
   }
 
-  // === BOOT ===
-  async function boot() {
+  // Rarity-weighted recruiting (no duplicates)
+  function candidatesByTier(t){ return players.filter(p=> p.tier===t && !collectionIds.includes(p.id)); }
+  function rollTier(){
+    const avail = Object.entries(TIER_WEIGHTS).filter(([t]) => candidatesByTier(t).length>0);
+    if (!avail.length) return null;
+    const total = avail.reduce((a,[,w])=>a+w,0);
+    let r = Math.random()*total;
+    for (const [t,w] of avail){ r -= w; if (r<=0) return t; }
+    return avail[avail.length-1][0];
+  }
+  function recruitRoll(){
+    if (!players.length) { alert('No players loaded yet.'); return; }
+    if (RECRUIT_COST>0 && cash<RECRUIT_COST){ alert('Not enough cash.'); return; }
+    const t = rollTier(); if (!t){ alert('You already own all available cards!'); return; }
+    const p = pick(candidatesByTier(t));
+    if (RECRUIT_COST>0){ cash=Math.max(0,cash-RECRUIT_COST); $('#cash').textContent=fmtCash(cash); save(); }
+    addToTeam(p.id);
+    $('#fightNote').textContent = `Recruited ${p.name} (${t}).`;
+  }
+
+  // Boot
+  async function boot(){
     load();
     $('#cash').textContent = fmtCash(cash);
     $('#bossLevel').textContent = bossLevel;
-
     $('#fightBtn').onclick = startFight;
-    $('#newBossBtn').onclick = ()=>{ if (fighting) return; newBoss(); $('#fightNote').textContent = 'New boss generated.'; };
+    $('#newBossBtn').onclick = ()=>{ if (fighting) return; newBoss(); $('#fightNote').textContent='New boss generated.'; };
     $('#freeCardBtn').onclick = handleFreeCommon;
-    $('#resetBtn').onclick = ()=>{ if(confirm('Reset local progress?')){ localStorage.removeItem('cdps.cash'); localStorage.removeItem('cdps.bossLevel'); localStorage.removeItem('cdps.collection'); localStorage.removeItem('cdps.team'); localStorage.removeItem('cdps.boss'); location.reload(); } };
+    $('#recruitBtn').onclick = recruitRoll;
+    $('#resetBtn').onclick = ()=>{ if(confirm('Reset local progress?')){ localStorage.clear(); location.reload(); } };
 
-    const needPlayers = !SHEET_PLAYERS_URL || SHEET_PLAYERS_URL.startsWith('PUT_');
-    const needStats   = !SHEET_STATS_URL   || SHEET_STATS_URL.startsWith('PUT_');
-    if (needPlayers || needStats) {
-      $('#playersEmpty').style.display = '';
-      $('#playersEmpty').textContent = '🔧 Set SHEET_PLAYERS_URL and SHEET_STATS_URL at top of file to your published CSV links.';
-    }
-
-    try {
-      let statsMatrix, playersMatrix;
-      if (!needStats) {
-        const sTxt = await fetch(SHEET_STATS_URL).then(r=>r.text());
-        statsMatrix = parseCSV(sTxt);
-      }
-      if (!needPlayers) {
-        const pTxt = await fetch(SHEET_PLAYERS_URL).then(r=>r.text());
-        playersMatrix = parseCSV(pTxt);
-      }
-
-      if (playersMatrix || statsMatrix) {
-        buildFromSheets(statsMatrix, playersMatrix);
-      } else {
-        // fallback demo for local dev
-        const demoStats = [
-          TIER_ORDER,
-          [200, 300, 400, 550, 700, 900, 1200], // HP row
-          [5,   8,   12,  18,  24,  35,  50],   // DPS row
-        ];
-        const demoPlayers = [
-          TIER_ORDER,
-          ['Finn','','','','','', ''],
-          ['Drelhian','Grok','Lauti','Vincent','Saykao','Nova','Astra'],
-          ['Mira','','Kai','','','Zed',''],
-        ];
-        buildFromSheets(demoStats, demoPlayers);
-      }
-    } catch (e) {
+    try{
+      const [pTxt, sTxt] = await Promise.all([
+        fetch(SHEET_PLAYERS_URL).then(r=>r.text()),
+        fetch(SHEET_STATS_URL).then(r=>r.text())
+      ]);
+      buildFromTwoMatrices(parseCSV(pTxt), parseCSV(sTxt));
+    }catch(e){
       console.error(e);
-      $('#playersEmpty').style.display = '';
-      $('#playersEmpty').textContent = 'Failed to load CSV. Check that both CSVs are published and CORS-accessible.';
+      $('#playersEmpty').style.display='';
+      $('#playersEmpty').textContent = 'Failed to load CSVs. Ensure both links are published and accessible.';
     }
 
     renderPlayers();
 
-    if (!collectionIds.length) {
-      $('#freeCardBtn').style.display = '';
-    } else {
-      $('#freeCardBtn').style.display = 'none';
-    }
-
-    if (!teamIds.length && collectionIds.length) {
-      teamIds = collectionIds.slice(0, 3);
-    }
+    if (!collectionIds.length) { $('#freeCardBtn').style.display=''; } else { $('#freeCardBtn').style.display='none'; }
+    if (!teamIds.length && collectionIds.length){ teamIds = collectionIds.slice(0,3); }
 
     renderTeam();
-
     if (!boss) newBoss();
     renderBoss();
   }
-
   boot();
   </script>
 </body>
