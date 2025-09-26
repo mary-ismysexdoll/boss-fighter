@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Crowd DPS — Boss Rush</title>
   <style>
-    :root{--bg:#0b0f14;--panel:#121821;--muted:#8aa0b6;--text:#e9f0f8;--brand:#7cc3ff;--accent:#6bf1c8;--danger:#ff6b6b;--gold:#ffd166;--shadow:0 10px 30px rgba(0,0,0,.35);--radius:16px}
-    *{box-sizing:border-box}html,body{height:100%}
+    :root { --bg:#0b0f14; --panel:#121821; --muted:#8aa0b6; --text:#e9f0f8; --brand:#7cc3ff; --accent:#6bf1c8; --danger:#ff6b6b; --gold:#ffd166; --shadow:0 10px 30px rgba(0,0,0,.35); --radius:16px }
+    *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans";color:var(--text);
-      background:radial-gradient(1200px 800px at 20% -10%,#112131 0%,var(--bg) 60%),
-                 radial-gradient(1000px 600px at 120% 10%,#182436 0%,transparent 60%),var(--bg)}
-    header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;gap:16px;position:sticky;top:0;backdrop-filter:blur(8px);
-      background:linear-gradient(180deg,rgba(10,14,20,.85),rgba(10,14,20,.55));border-bottom:1px solid rgba(255,255,255,.06);z-index:5}
+      background:radial-gradient(1200px 800px at 20% -10%,#112131 0%,var(--bg) 60%),radial-gradient(1000px 600px at 120% 10%,#182436 0%,transparent 60%),var(--bg)}
+    header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;gap:16px;position:sticky;top:0;backdrop-filter:blur(8px);background:linear-gradient(180deg,rgba(10,14,20,.85),rgba(10,14,20,.55));border-bottom:1px solid rgba(255,255,255,.06);z-index:5}
     .title{font-weight:800;letter-spacing:.4px}.title span{opacity:.7;font-weight:600}
     .pill{display:inline-flex;align-items:center;gap:10px;background:#0f1722;border:1px solid rgba(255,255,255,.08);padding:10px 14px;border-radius:999px;box-shadow:var(--shadow);font-weight:600;color:var(--muted)}
     .pill .value{color:var(--text)}
@@ -24,11 +22,8 @@
     .panel{background:linear-gradient(180deg,#0f1520,#0b1018);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;min-height:120px}
     .panel h2{margin:0 0 10px;font-size:16px;font-weight:800;letter-spacing:.3px;color:var(--muted)}
     .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-    .card{position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(180deg,rgba(22,30,45,.9),rgba(16,20,30,.9));
-      border:1px solid rgba(255,255,255,.05);box-shadow:0 8px 20px rgba(0,0,0,.25);padding:12px;display:grid;gap:10px}
-    .card::before{content:"";position:absolute;inset:-2px;border-radius:16px;padding:1px;
-      background:conic-gradient(from 180deg,rgba(124,195,255,.5),rgba(107,241,200,.45),rgba(255,209,102,.45),rgba(124,195,255,.5));
-      -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+    .card{position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(180deg,rgba(22,30,45,.9),rgba(16,20,30,.9));border:1px solid rgba(255,255,255,.05);box-shadow:0 8px 20px rgba(0,0,0,.25);padding:12px;display:grid;gap:10px}
+    .card::before{content:"";position:absolute;inset:-2px;border-radius:16px;padding:1px;background:conic-gradient(from 180deg,rgba(124,195,255,.5),rgba(107,241,200,.45),rgba(255,209,102,.45),rgba(124,195,255,.5));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
     .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
     .badge{font-size:11px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);opacity:.9}
     .badge.tier{font-weight:800;letter-spacing:.4px}
@@ -50,6 +45,8 @@
     <div class="toolbar">
       <div class="pill">Cash: <span class="value" id="cash">$0.00</span></div>
       <div class="pill">Boss Lvl: <span class="value" id="bossLevel">1</span></div>
+      <div class="pill">Roll Cost: <span class="value" id="rollCost">$0.00</span></div>
+      <div class="pill">Roll Cost: <span class="value" id="rollCost">$0.00</span></div>
       <button id="resetBtn" class="btn small" title="Reset local progress">Reset</button>
     </div>
   </header>
@@ -97,14 +94,33 @@
 
   <script>
   // === CONFIG ===
-  // You can paste EITHER publish-to-web CSV URLS OR the normal /edit links — we'll auto-convert.
   const SHEET_PLAYERS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMUnfamouCORKPavgJqVoMsSNDyx-emsTNi5dJw2DNx1IcWnPH-I6tgeN9EsAWoLXCUSmWpe5JyfZn/pub?output=csv";
   const SHEET_STATS_URL   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRgc7Pm81icSxeJP3dySkafpNEyAElWNXiHUgue3wLcNUsanku5Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
 
-  const RECRUIT_COST = 0.00; // set > 0 to charge per roll (e.g., 0.25)
+  const RECRUIT_COST = 0.00; // set > 0 to charge per roll
   const TIER_ORDER = ["F-Tier","D-Tier","C-Tier","B-Tier","A-Tier","S-Tier","SS-Tier"];
-  const TIER_COLORS = {"F-Tier":"#94a3b8","D-Tier":"#a78bfa","C-Tier":"#60a5fa","B-Tier":"#34d399","A-Tier":"#fbbf24","S-Tier":"#f472b6","SS-Tier":"#f59e0b"};
-  const TIER_WEIGHTS = {"F-Tier":0.45,"D-Tier":0.20,"C-Tier":0.14,"B-Tier":0.09,"A-Tier":0.06,"S-Tier":0.04,"SS-Tier":0.02};
+  const TIER_COLORS = {"F-Tier":"#94a3b8","D-Tier":"#a78bfa","C-Tier":"#6const TIER_BASE_WEIGHTS = {"F-Tier":0.45,"D-Tier":0.20,"C-Tier":0.14,"B-Tier":0.09,"A-Tier":0.06,"S-Tier":0.04,"SS-Tier":0.02};
+  // Fairness knobs (pity + economy)
+  const FAIRNESS = {
+    cost: { base: 0.20, perRecruit: 0.02, dailyFree: 1, maxCost: 1.00 }, // dollars
+    pity: {
+      A:  { softStart: 8,  hard: 20, softStep: 0.15 },   // boost A/S/SS from roll 9; hard guarantee A+ at 20
+      S:  { softStart: 20, hard: 45, softStep: 0.20 },   // boost S/SS from roll 21; hard guarantee S+ at 45
+      SS: { softStart: 40, hard: 80, softStep: 0.25 }    // boost SS from roll 41; hard guarantee SS at 80
+    }
+  };":0.45,"D-Tier":0.20,"C-Tier":0.14,"B-Tier":0.09,"A-Tier":0.06,"S-Tier":0.04,"SS-Tier":0.02};
+  // Fairness knobs (pity + economy)
+  const FAIRNESS = {
+    cost: { base: 0.20, perRecruit: 0.02, dailyFree: 1, maxCost: 1.00 }, // dollars
+    pity: {
+      A:  { softStart: 8,  hard: 20, softStep: 0.15 },   // boost A/S/SS from roll 9; hard guarantee A+ at 20
+      S:  { softSlet hpMap = {};      // runtime HP per card id for current boss
+  // Pity & daily economy
+  let pity = { A: 0, S: 0, SS: 0 };
+  let recruitsToday = 0; let lastRecruitDay = ''; 21; hard guarantee S+ at 45
+      SS: { softStart: 40, hard: 80, softStep: 0.25 }    // boost SS from roll 41; hard guarantee SS at 80
+    }
+  };
 
   // === STATE ===
   let tiers = {};      // per-tier {hp,dps,players[]}
@@ -113,71 +129,53 @@
   let teamIds = [];        // == collectionIds (auto)
   let cash = 0, bossLevel = 1;
   let boss = null;     // { name, level, maxHp, hp, dps }
-  let fighting = false, fightTimer = null;
-  let hpMap = {};      // runtime HP per card id for current boss
-
-  // === UTIL ===
-  const $ = s => document.querySelector(s);
-  const el = (t,p={}) => Object.assign(document.createElement(t), p);
-  const clamp = (v,l,h)=>Math.max(l,Math.min(h,v));
-  const fmtCash = v => `$${Number(v).toFixed(2)}`;
-  const fmtNum = v => (Math.round(v*100)/100).toString();
-  const rand = (a=0,b=1)=> a + Math.random()*(b-a);
-  const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+  let fightingconst idFrom = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  const todayKey = ()=> new Date().toISOString().slice(0,10);
+  function ensureDailyCounters(){ const today = todayKey(); if (lastRecruitDay !== today){ lastRecruitDay = today; recruitsToday = 0; save(); } }
+  function totalRecruits(){ return collectionIds.length; }
+  function currentRecruitCost(){ ensureDailyCounters(); const freeLeft = Math.max(0, FAIRNESS.cost.dailyFree - recruitsToday); if (freeLeft>0) return 0; const scaled = FAIRNESS.cost.base + FAIRNESS.cost.perRecruit * totalRecruits(); return Math.min(FAIRNESS.cost.maxCost, Math.round(scaled*100)/100); }
+  function updateRecruitCostUI(){ const elc = document.getElementById('rollCost'); if (elc) elc.textContent = fmtCash(currentRecruitCost()); }
+  function dynamicTierWeights(){ const weights = { ...TIER_BASE_WEIGHTS }; const { A:PA, S:PS, SS:PSS } = FAIRNESS.pity; if (pity.A >= PA.softStart){ const steps=(pity.A-PA.softStart+1); const mult=1+PA.softStep*steps; weights['A-Tier']*=mult; weights['S-Tier']*=mult; weights['SS-Tier']*=mult; } if (pity.S >= PS.softStart){ const steps=(pity.S-PS.softStart+1); const mult=1+PS.softStep*steps; weights['S-Tier']*=mult; weights['SS-Tier']*=mult; } if (pity.SS >= PSS.softStart){ const steps=(pity.SS-PSS.softStart+1); const mult=1+PSS.softStep*steps; weights['SS-Tier']*=mult; } return weights; }
+  function pickTierWithPity(){ const { A:PA, S:PS, SS:PSS } = FAIRNESS.pity; const availByTier = t => players.some(p=> p.tier===t && !collectionIds.includes(p.id)); if (pity.SS >= PSS.hard && availByTier('SS-Tier')) return 'SS-Tier'; if (pity.S >= PS.hard){ const tiersHigh=['SS-Tier','S-Tier']; const t=tiersHigh.find(availByTier); if(t) return t; } if (pity.A >= PA.hard){ const tiersA=['SS-Tier','S-Tier','A-Tier']; const t=tiersA.find(availByTier); if(t) return t; } const weights = dynamicTierWeights(); const avail = Object.entries(weights).filter(([t,w])=> w>0 && players.some(p=> p.tier===t && !collectionIds.includes(p.id))); if(!avail.length) return null; const total = avail.reduce((a,[,w])=> a+w,0); let r=Math.random()*total; for(const [t,w] of avail){ r-=w; if(r<=0) return t; } return avail[avail.length-1][0]; }
+  function bumpPity(tier){ if (tier==='SS-Tier'){ pity.SS=0; pity.S=0; pity.A=0; } else if (tier==='S-Tier'){ pity.S=0; pity.A=0; pity.SS++; } else if (tier==='A-Tier'){ pity.A=0; pity.S++; pity.SS++; } else { pity.A++; pity.S++; pity.SS++; } }fighfunction save(){
+    localStorage.setItem('cdps.cash',String(cash));
+    localStorage.setItem('cdps.bossLevel',String(bossLevel));
+    localStorage.setItem('cdps.collection',JSON.stringify(collectionIds));
+    if (boss) localStorage.setItem('cdps.boss',JSON.stringify(boss));
+    localStorage.setItem('cdps.pity', JSON.stringify(pity));
+    localStorage.setItem('cdps.recruitsToday', String(recruitsToday));
+    localStorage.setItem('cdps.lastRecruitDay', lastRecruitDay||'');
+  }sigfunction load(){
+    cash=parseFloat(localStorage.getItem('cdps.cash')||'0')||0;
+    bossLevel=parseInt(localStorage.getItem('cdps.bossLevel')||'1')||1;
+    collectionIds=JSON.parse(localStorage.getItem('cdps.collection')||'[]');
+    try{boss=JSON.parse(localStorage.getItem('cdps.boss')||'null');}catch{boss=null}
+    try{pity=JSON.parse(localStorage.getItem('cdps.pity')||'{"A":0,"S":0,"SS":0}');}catch{pity={A:0,S:0,SS:0}}
+    recruitsToday=parseInt(localStorage.getItem('cdps.recruitsToday')||'0')||0;
+    lastRecruitDay=localStorage.getItem('cdps.lastRecruitDay')||'';
+  }(Math.random()*arr.length)];
   const idFrom = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
 
-  function normalizeUrl(u){
-    if (!u) return u;
-    try{
-      const url = new URL(u);
-      // Convert edit links → export CSV
-      if (url.pathname.includes("/spreadsheets/d/") && url.pathname.includes("/edit")){
-        const id = url.pathname.split("/d/")[1].split("/")[0];
-        // gid may be in query or hash
-        const gid = url.searchParams.get("gid") || (url.hash.startsWith("#gid=") ? url.hash.split("=")[1] : "0");
-        return `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`;
-      }
-      return u;
-    } catch { return u; }
-  }
+  function save(){ localStorage.Float(localStorage.getItem('cdps.cash')||'0')||0; bossLevel=parseInt(localStorage.getItem('cdps.bossLevel')||'1')||1; collectionIds=JSON.parse(localStorage.getItem('cdps.collection')||'[]'); try{boss=JSON.parse(localStorage.getItem('cdps.boss')||'null');}catch{boss=null} }
 
-  function save(){ localStorage.setItem('cdps.cash',String(cash)); localStorage.setItem('cdps.bossLevel',String(bossLevel)); localStorage.setItem('cdps.collection',JSON.stringify(collectionIds)); if (boss) localStorage.setItem('cdps.boss',JSON.stringify(boss)); }
-  function load(){ cash=parseFloat(localStorage.getItem('cdps.cash')||'0')||0; bossLevel=parseInt(localStorage.getItem('cdps.bossLevel')||'1')||1; collectionIds=JSON.parse(localStorage.getItem('cdps.collection')||'[]'); try{boss=JSON.parse(localStorage.getItem('cdps.boss')||'null');}catch{boss=null} }
-
-  // Robust CSV parser (quotes, commas, CRLF)
-  function parseCSV(text){
-    const rows=[]; let row=[], cell="", inQ=false;
-    for(let i=0;i<text.length;i++){
-      const ch=text[i], nxt=text[i+1];
-      if(ch==='\"'){ if(inQ && nxt==='\"'){ cell+='\"'; i++; } else inQ=!inQ; }
-      else if(ch===',' && !inQ){ row.push(cell.trim()); cell=""; }
-      else if((ch==='\n'||ch==='\r') && !inQ){
-        if(cell.length||row.length){ row.push(cell.trim()); rows.push(row); row=[]; cell=""; }
-        if(ch==='\r'&&nxt==='\n') i++;
-      } else { cell+=ch; }
-    }
-    if(cell.length||row.length){ row.push(cell.trim()); rows.push(row); }
-    return rows.filter(r=> r.length && r.some(c=>c!==""));
-  }
-
-  // Fuzzy header → canonical tier
+  function parseCSV(text){ return text.trim().split(/
+?
+/).map(r=> r.split(',').map(c=> c.replace(/^\"|\"$/g,'').trim())); }
   function mapHeaderToTiers(headers){
-    const norm = h => (h||"").toString().toLowerCase().replace(/[^a-z]/g,"");
-    const canon = k => k==="f"||k==="ftier"?"F-Tier":
-                       k==="d"||k==="dtier"?"D-Tier":
-                       k==="c"||k==="ctier"?"C-Tier":
-                       k==="b"||k==="btier"?"B-Tier":
-                       k==="a"||k==="atier"?"A-Tier":
-                       k==="s"||k==="stier"?"S-Tier":
-                       k==="ss"||k==="sstier"?"SS-Tier":null;
-    return headers.map(h => canon(norm(h)));
+    function canonicalTier(h){
+      const k a') return 'A-Tier';
+      if (k==='stier'||k==='s') return 'S-Tier';
+      if (k==='sstier'||k==='ss') return 'SS-Tier';
+      return null;
+    }
+    return headers.map(h=> canonicalTier(h));
   }
 
   function buildFromSheets(statsMatrix, playersMatrix){
     tiers={}; TIER_ORDER.forEach(t=> tiers[t]={hp:100,dps:5,players:[]});
 
     function findHeaderRow(matrix){
-      const maxScan = Math.min(20, matrix.length);
+      const maxScan = Math.min(5, matrix.length);
       let bestRow = 0, bestHits = -1;
       for (let r=0;r<maxScan;r++){
         const hits = (matrix[r]||[]).map(h=> (h||'').toString()).filter(h=> mapHeaderToTiers([h])[0]).length;
@@ -186,10 +184,11 @@
       return bestRow;
     }
 
-    // Stats: header row; next row = HP; next row = DPS
+    // Stats: row 2=HP, row 3=DPS relative to its header row
     if (statsMatrix && statsMatrix.length){
       const sStart = findHeaderRow(statsMatrix);
-      const sCols = mapHeaderToTiers(statsMatrix[sStart] || []);
+      const sHeaders = statsMatrix[sStart] || [];
+      const sCols = mapHeaderToTiers(sHeaders);
       const hpRow = statsMatrix[sStart+1] || [];
       const dpsRow = statsMatrix[sStart+2] || [];
       sCols.forEach((tierName,i)=>{
@@ -200,10 +199,11 @@
       });
     }
 
-    // Players: header row; following rows = names
+    // Players: from header row + 1 onward are names
     if (playersMatrix && playersMatrix.length){
       const pStart = findHeaderRow(playersMatrix);
-      const pCols = mapHeaderToTiers(playersMatrix[pStart] || []);
+      const pHeaders = playersMatrix[pStart] || [];
+      const pCols = mapHeaderToTiers(pHeaders);
       for (let r=pStart+1;r<playersMatrix.length;r++){
         const row=playersMatrix[r]||[];
         for(let c=0;c<row.length;c++){
@@ -215,12 +215,7 @@
     }
 
     players=[];
-    for(const t of TIER_ORDER){
-      const baseHp=tiers[t].hp, baseDps=tiers[t].dps;
-      for(const name of tiers[t].players){
-        players.push({id:idFrom(name+"-"+t), name, tier:t, hp:baseHp, dps:baseDps});
-      }
-    }
+    for(const t of TIER_ORDER){ const baseHp=tiers[t].hp, baseDps=tiers[t].dps; for(const name of tiers[t].players){ players.push({id:idFrom(name+"-"+t), name, tier:t, hp:baseHp, dps:baseDps}); } }
   }
 
   // === RENDER ===
@@ -245,25 +240,14 @@
   }
 
   function renderPlayers(){
-    const wrap=$('#players'); wrap.innerHTML='';
-    if(!players.length){
-      const msg='No players parsed. Check: 1) Headers include F/D/C/B/A/S/SS, 2) Usernames are below the header row, 3) Stats has HP row then DPS row.';
-      const empty=$('#playersEmpty'); if(empty){ empty.style.display=''; empty.textContent=msg; }
-      console.debug('[CrowdDPS] Players empty.');
+    const wrap=$('#players'); wrap.innerHTML=''; if(!players.length){
+      const msg = 'No players parsed. Check: 1) Players sheet headers include F/D/C/B/A/S/SS (any style), 2) Usernames start on row 2, 3) Stats sheet row 2=HP row 3=DPS.';
+      const empty = $('#playersEmpty'); if (empty){ empty.style.display=''; empty.textContent = msg; }
+      console.debug('[CrowdDPS] Players empty. Inspect headers/rows.');
       return;
-    }
-    $('#playersEmpty').style.display='none';
+    } $('#playersEmpty').style.display='none';
     const grouped=Object.fromEntries(TIER_ORDER.map(t=>[t,[]])); players.forEach(p=> grouped[p.tier].push(p));
-    for(const t of TIER_ORDER){
-      const list=grouped[t]; if(!list.length) continue;
-      const header=el('div',{className:'card'}); const row=el('div',{className:'row'});
-      row.append(el('div',{className:'name',textContent:`${t} · ${list.length}`}), tierBadge(t));
-      header.append(row); wrap.append(header);
-      list.forEach(p=> wrap.append(playerCard(p,'info')));
-    }
-  }
-
-  function renderTeam(){
+    for(const t of TIER_ORDER){ const list=grouped[t]; if(!list.length) continue; const header=el('div',{className:'card'}); const row=el('div',{className:'row'}); row.append(el('div',{className:'name',textContent:`${t} · ${list.lengthfunction renderTeam(){
     teamIds=[...collectionIds]; // team == owned
     const wrap=$('#team'); wrap.innerHTML='';
     const team=teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean);
@@ -271,16 +255,16 @@
     updateTeamHPUI();
     const dps=team.reduce((a,p)=>a+p.dps,0), hp=team.reduce((a,p)=>a+(hpMap[p.id]??p.hp),0);
     $('#yourDPS').textContent=fmtNum(dps); $('#yourHP').textContent=fmtNum(hp);
+    updateRecruitCostUI();
+  }team=teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean);
+    if(!team.length){ $('#teamEmpty').style.display=''; } else { $('#teamEmpty').style.display='none'; team.forEach(p=> wrap.append(playerCard(p,'team'))); }
+    updateTeamHPUI();
+    const dps=team.reduce((a,p)=>a+p.dps,0), hp=team.reduce((a,p)=>a+(hpMap[p.id]??p.hp),0);
+    $('#yourDPS').textContent=fmtNum(dps); $('#yourHP').textContent=fmtNum(hp);
   }
 
   function updateTeamHPUI(){
-    for(const id of teamIds){
-      const p=players.find(x=>x.id===id); if(!p) continue;
-      const cur=hpMap[id]??p.hp; const pct=clamp((cur/p.hp)*100,0,100);
-      const bar=$(`#bar-${id}`); if(bar) bar.style.width=pct+'%';
-      const hptext=$(`#hptext-${id}`); if(hptext) hptext.innerHTML=`HP <span class="v">${fmtNum(Math.max(0,cur))}</span>`;
-      const status=$(`#status-${id}`); if(status) status.textContent = cur<=0 ? 'KO' : '';
-    }
+    for(const id of teamIds){ const p=players.find(x=>x.id===id); if(!p) continue; const cur=hpMap[id]??p.hp; const pct=clamp((cur/p.hp)*100,0,100); const bar=$(`#bar-${id}`); if(bar) bar.style.width=pct+'%'; const hptext=$(`#hptext-${id}`); if(hptext) hptext.innerHTML=`HP <span class="v">${fmtNum(Math.max(0,cur))}</span>`; const status=$(`#status-${id}`); if(status) status.textContent = cur<=0 ? 'KO' : ''; }
   }
 
   // === COLLECTION ===
@@ -299,31 +283,18 @@
   }
   function rewardFor(level){ const base=0.10, growth=0.03*level, variance=rand(0.95,1.05); return Math.round((base+growth)*variance*100)/100; }
   function renderBoss(){ if(!boss) return; $('#bossName').textContent=boss.name; $('#bossLevel').textContent=boss.level; $('#bossBadge').textContent=`Level ${boss.level}`; $('#bossStats').textContent=`HP ${Math.ceil(boss.hp)} / ${boss.maxHp}`; $('#hpFill').style.width = clamp((boss.hp/boss.maxHp)*100,0,100)+'%'; }
-  function newBoss(){
-    const team=teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean);
-    hpMap={}; team.forEach(p=> hpMap[p.id]=p.hp);
-    const dps=Math.max(1, team.reduce((a,p)=>a+p.dps,0));
-    const thp=team.reduce((a,p)=>a+p.hp,0);
-    boss=genBoss(bossLevel,dps,thp); save(); renderBoss(); renderTeam(); $('#fightNote').textContent='A new foe appears!';
-  }
+  function newBoss(){ const team=teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean); hpMap={}; team.forEach(p=> hpMap[p.id]=p.hp); const dps=Math.max(1, team.reduce((a,p)=>a+p.dps,0)); const thp=team.reduce((a,p)=>a+p.hp,0); boss=genBoss(bossLevel,dps,thp); save(); renderBoss(); renderTeam(); $('#fightNote').textContent='A new foe appears!'; }
 
   // === COMBAT ===
   function livingIds(){ return teamIds.filter(id=> (hpMap[id]??0) > 0); }
   function startFight(){
-    if(fighting || !boss) return;
-    const team=teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean);
-    const dps=team.reduce((a,p)=>a+p.dps,0);
-    if(dps<=0){ alert('Your team has 0 DPS. Recruit at least one card.'); return; }
+    if(fighting || !boss) return; const team=teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean); const dps=team.reduce((a,p)=>a+p.dps,0); if(dps<=0){ alert('Your team has 0 DPS. Recruit at least one card.'); return; }
     fighting=true; $('#fightBtn').disabled=true; $('#newBossBtn').disabled=true;
     const tickMs=100; fightTimer=setInterval(()=>{
       // Your damage to boss
       boss.hp=Math.max(0, boss.hp - dps*(tickMs/1000));
       // Boss damage to a random living unit
-      const alive=livingIds();
-      if(alive.length){
-        const targetId=pick(alive);
-        hpMap[targetId]=Math.max(0, (hpMap[targetId]??0) - boss.dps*(tickMs/1000));
-      }
+      const alive=livingIds(); if(alive.length){ const targetId=pick(alive); hpMap[targetId]=Math.max(0, (hpMap[targetId]??0) - boss.dps*(tickMs/1000)); }
       updateTeamHPUI(); renderBoss();
       if(boss.hp<=0){
         clearInterval(fightTimer); fighting=false; $('#fightBtn').disabled=false; $('#newBossBtn').disabled=false;
@@ -336,74 +307,35 @@
 
   // === RECRUITING ===
   function candidatesByTier(t){ return players.filter(p=> p.tier===t && !collectionIds.includes(p.id)); }
-  function rollTier(){
-    const avail=Object.entries(TIER_WEIGHTS).filter(([t])=> candidatesByTier(t).length>0);
-    if(!avail.length) return null;
-    const total=avail.reduce((a,[,w])=>a+w,0);
-    let r=Math.random()*total;
-    for(const [t,w] of avail){ r-=w; if(r<=0) return t; }
-    return avail[avail.length-1][0];
-  }
-  function recruit(){
+  function rollTier(){ const avail=Object.entries(TIER_WEIGHTS).filter(([t])=> candidatesByTier(t).length>0); if(!avail.length) return null; const total=avail.reduce((a,[,w])=>a+function recruit(){
     if(!players.length){ alert('No players loaded yet.'); return; }
-    if(RECRUIT_COST>0 && cash<RECRUIT_COST){ alert('Not enough cash.'); return; }
-    const t=rollTier(); if(!t){ alert('You already own all available cards!'); return; }
-    const p=pick(candidatesByTier(t));
-    if(RECRUIT_COST>0){ cash=Math.max(0,cash-RECRUIT_COST); $('#cash').textContent=fmtCash(cash); save(); }
+    ensureDailyCounters();
+    const cost = currentRecruitCost();
+    if(cost>0 && cash<cost){ alert(`Not enough cash. Roll costs ${fmtCash(cost)}.`); return; }
+    const t = pickTierWithPity(); if(!t){ alert('You already own all available cards!'); return; }
+    const cands = players.filter(p=> p.tier===t && !collectionIds.includes(p.id)); if(!cands.length){ alert('No candidates available in selected tier.'); return; }
+    const p = pick(cands);
+    if(cost>0){ cash = Math.max(0, cash - cost); $('#cash').textContent = fmtCash(cash); }
+    recruitsToday += 1;
     addToCollection(p.id);
+    bumpPity(t);
+    save(); updateRecruitCostUI();
     $('#fightNote').textContent=`Recruited ${p.name} (${t}).`;
-  }
+  }; } return avail[avail.length-1][0]; }
+  function recruit(){ if(!players.length){ alert('No players loaded yet.'); return; } if(RECRUIT_COST>0 && cash<RECRUIT_COST){ alert('Not enough cash.'); return; } const t=rollTier(); if(!t){ alert('You already own all available cards!'); return; } const p=pick(candidatesByTier(t)); if(RECRUIT_COST>0){ cash=Math.max(0,cash-RECRUIT_COST); $('#cash').textContent=fmtCash(cash); } addToCollection(p.id); $('#fightNote').textContent=`Recruited ${p.name} (${t}).`; }
 
   // === FREE COMMON ===
-  function handleFreeCommon(){
-    const f=tiers['F-Tier']?.players||[];
-    let candidate=f.length?pick(f):null;
-    if(!candidate){
-      const all=players.map(p=>p.name);
-      if(!all.length) return alert('No players in sheet yet.');
-      candidate=pick(all);
-    }
-    const p=players.find(x=> x.name===candidate && x.tier==='F-Tier') || players.find(x=> x.name===candidate);
-    if(!p) return alert('Could not find a card to grant.');
-    if(collectionIds.includes(p.id)){ $('#fightNote').textContent='Common already owned.'; return; }
-    addToCollection(p.id);
-    $('#freeCardBtn').style.display='none';
-    $('#fightNote').textContent=`Granted free common card: ${p.name}!`;
-  }
-
-  // === BOOT ===
-  async function boot(){
+  function handleFreeCommon(){ const f=tiers['F-Tier']?.players||[]; let candidate=f.length?pick(f):null; if(!candidate){ const all=players.map(p=>p.name); if(!all.length) return alert('No players in sheet yet.'); candidate=pick(all); } const p=players.find(x=> x.name===candidate && x.tier==='F-Tier') || players.find(x=> x.name===candidate); if(!p) return alert('Could not find a card to grant.'); if(collectionIds.includes(p.id)){ $('#fightNote').textContent='Common already owned.'; return; } addToCollection(p.id); $('#freasync function boot(){
     load(); $('#cash').textContent=fmtCash(cash); $('#bossLevel').textContent=bossLevel;
-    $('#fightBtn').onclick=startFight;
-    $('#newBossBtn').onclick=()=>{ if(fighting) return; newBoss(); };
-    $('#freeCardBtn').onclick=handleFreeCommon;
-    $('#recruitBtn').onclick=recruit;
-    $('#resetBtn').onclick=()=>{ if(confirm('Reset local progress?')){ localStorage.clear(); location.reload(); } };
-
-    const PURL = normalizeUrl(SHEET_PLAYERS_URL);
-    const SURL = normalizeUrl(SHEET_STATS_URL);
-
-    if (location.protocol === "file:") {
-      console.warn("Serving from file:// can block cross-origin fetches. Use a local server or GitHub Pages.");
-    }
-
-    try{
-      const [pTxt,sTxt] = await Promise.all([
-        fetch(PURL).then(r=>{ if(!r.ok) throw new Error('Players CSV HTTP '+r.status); return r.text(); }),
-        fetch(SURL).then(r=>{ if(!r.ok) throw new Error('Stats CSV HTTP '+r.status); return r.text(); })
-      ]);
-      console.debug('[CrowdDPS] Loaded CSVs', {playersBytes:pTxt.length, statsBytes:sTxt.length, PURL, SURL});
+    $('#fightBtn').onclick=startFight; $('#newBossBtn').onclick=()=>{ if(fighting) return; newBoss(); };
+    $('#freeCardBtn').onclick=handleFreeCommon; $('#recruitBtn').onclick=recruit; $('#resetBtn').onclick=()=>{ if(confirm('Reset local progress?')){ localStorage.clear(); location.reload(); } };
+    updateRecruitCostUI();
+    try{ const [pTxt,sTxt] = await Promise.all([ fetch(SHEET_PLAYERS_URL).then(r=>r.text()), fetch(SHEET_STATS_URL).then(r=>r.text()) ]); console.debug('[CrowdDPS] Loaded CSVs', {statsBytes:sTxt.length, playersBytes:pTxt.length});
       buildFromSheets(parseCSV(sTxt), parseCSV(pTxt));
-      console.debug('[CrowdDPS] Built', {playersCount: players.length, tiers});
-    } catch(e){
-      console.error(e);
-      const empty=$('#playersEmpty'); if(empty){ empty.style.display=''; empty.textContent='Failed to load CSVs: '+e.message; }
-    }
-
-    renderPlayers(); renderTeam();
-    if(!boss) newBoss(); renderBoss();
-    // Free card gate on fresh start
-    if(!collectionIds.length) $('#freeCardBtn').style.display=''; else $('#freeCardBtn').style.display='none';
+      console.debug('[CrowdDPS] Built', {tiers, playersCount: players.length}); }
+    catch(e){ console.error(e); $('#playersEmpty').style.display=''; $('#playersEmpty').textContent='Failed to load CSVs. Ensure both links are published and accessible.'; }
+    renderPlayers(); renderTeam(); if(!boss) newBoss(); renderBoss();
+    if(!collectionIds.length) $('#freeCardBtn').style.display=''; else $('#freeCardBtn').style.display='n    if(!collectionIds.length) $('#freeCardBtn').style.display=''; else $('#freeCardBtn').style.display='none';
   }
   boot();
   </script>
