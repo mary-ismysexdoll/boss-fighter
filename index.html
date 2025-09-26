@@ -1,847 +1,705 @@
 <!doctype html>
- <html lang="en">
- <head>
-   <meta charset="utf-8" />
-   <meta name="viewport" content="width=device-width, initial-scale=1" />
-   <title>Crowd DPS — Boss Rush</title>
-   <style>
--    :root { --bg:#0b0f14; --panel:#121821; --muted:#8aa0b6; --text:#e9f0f8; --brand:#7cc3ff; --accent:#6bf1c8; --danger:#ff6b6b; --gold:#ffd166; --shadow:0 10px 30px rgba(0,0,0,.35); --radius:16px }
--    *{box-sizing:border-box} html,body{height:100%}
--    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans";color:var(--text);
--      background:radial-gradient(1200px 800px at 20% -10%,#112131 0%,var(--bg) 60%),radial-gradient(1000px 600px at 120% 10%,#182436 0%,transparent 60%),var(--bg)}
--    header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;gap:16px;position:sticky;top:0;backdrop-filter:blur(8px);background:linear-gradient(180deg,rgba(10,14,20,.85),rgba(10,14,20,.55));border-bottom:1px solid rgba(255,255,255,.06);z-index:5}
-+    :root {
-+      --bg:#0b0f14; --panel:#121821; --muted:#8aa0b6; --text:#e9f0f8; --brand:#7cc3ff;
-+      --accent:#6bf1c8; --danger:#ff6b6b; --gold:#ffd166; --shadow:0 10px 30px rgba(0,0,0,.35);
-+      --radius:16px;
-+    }
-+    *{box-sizing:border-box}
-+    html,body{height:100%}
-+    body{
-+      margin:0;
-+      font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans";
-+      color:var(--text);
-+      background:radial-gradient(1200px 800px at 20% -10%,#112131 0%,var(--bg) 60%),
-+                 radial-gradient(1000px 600px at 120% 10%,#182436 0%,transparent 60%),
-+                 var(--bg);
-+    }
-+    header{
-+      display:flex;align-items:center;justify-content:space-between;padding:18px 20px;gap:16px;
-+      position:sticky;top:0;backdrop-filter:blur(8px);
-+      background:linear-gradient(180deg,rgba(10,14,20,.85),rgba(10,14,20,.55));
-+      border-bottom:1px solid rgba(255,255,255,.06);z-index:5;
-+    }
-     .title{font-weight:800;letter-spacing:.4px}.title span{opacity:.7;font-weight:600}
--    .pill{display:inline-flex;align-items:center;gap:10px;background:#0f1722;border:1px solid rgba(255,255,255,.08);padding:10px 14px;border-radius:999px;box-shadow:var(--shadow);font-weight:600;color:var(--muted)}
-+    .pill{display:inline-flex;align-items:center;gap:10px;background:#0f1722;border:1px solid rgba(255,255,255,.08);
-+      padding:10px 14px;border-radius:999px;box-shadow:var(--shadow);font-weight:600;color:var(--muted)}
-     .pill .value{color:var(--text)}
--    .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:linear-gradient(180deg,#1a2332,#121a26);color:var(--text);cursor:pointer;user-select:none;font-weight:700;box-shadow:var(--shadow);transition:transform .05s ease,filter .2s ease,background .2s ease}
--    .btn.small{padding:8px 10px;font-size:12px}.btn:hover{filter:brightness(1.1)}.btn:active{transform:translateY(1px) scale(.99)}
-+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border:1px solid rgba(255,255,255,.1);
-+      border-radius:10px;background:linear-gradient(180deg,#1a2332,#121a26);color:var(--text);cursor:pointer;user-select:none;
-+      font-weight:700;box-shadow:var(--shadow);transition:transform .05s ease,filter .2s ease,background .2s ease}
-+    .btn.small{padding:8px 10px;font-size:12px}
-+    .btn:hover{filter:brightness(1.1)}
-+    .btn:active{transform:translateY(1px) scale(.99)}
-     .btn.brand{background:linear-gradient(180deg,#2589ff,#1761c8);border-color:#2a66b8}
-     .btn.neon{background:linear-gradient(180deg,#1f3b3b,#142626);border-color:#2e6f68;color:#b7fff0}
-     main{display:grid;gap:18px;padding:18px;max-width:1400px;margin:0 auto;grid-template-columns:1fr minmax(420px,520px) 1fr}
-     @media (max-width:1100px){main{grid-template-columns:1fr}.panel{order:unset!important}}
--    .panel{background:linear-gradient(180deg,#0f1520,#0b1018);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;min-height:120px}
-+    .panel{background:linear-gradient(180deg,#0f1520,#0b1018);border:1px solid rgba(255,255,255,.07);
-+      border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;min-height:120px}
-     .panel h2{margin:0 0 10px;font-size:16px;font-weight:800;letter-spacing:.3px;color:var(--muted)}
-     .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
--    .card{position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(180deg,rgba(22,30,45,.9),rgba(16,20,30,.9));border:1px solid rgba(255,255,255,.05);box-shadow:0 8px 20px rgba(0,0,0,.25);padding:12px;display:grid;gap:10px}
--    .card::before{content:"";position:absolute;inset:-2px;border-radius:16px;padding:1px;background:conic-gradient(from 180deg,rgba(124,195,255,.5),rgba(107,241,200,.45),rgba(255,209,102,.45),rgba(124,195,255,.5));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
-+    .card{position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(180deg,rgba(22,30,45,.9),rgba(16,20,30,.9));
-+      border:1px solid rgba(255,255,255,.05);box-shadow:0 8px 20px rgba(0,0,0,.25);padding:12px;display:grid;gap:10px}
-+    .card::before{content:"";position:absolute;inset:-2px;border-radius:16px;padding:1px;
-+      background:conic-gradient(from 180deg,rgba(124,195,255,.5),rgba(107,241,200,.45),rgba(255,209,102,.45),rgba(124,195,255,.5));
-+      -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-+      -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
-     .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-     .badge{font-size:11px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);opacity:.9}
-     .badge.tier{font-weight:800;letter-spacing:.4px}
-     .name{font-weight:800;font-size:16px;letter-spacing:.2px}
--    .stat{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--muted);padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:#0e1520}
-+    .stat{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--muted);padding:6px 8px;border-radius:8px;
-+      border:1px solid rgba(255,255,255,.08);background:#0e1520}
-     .stat .v{color:var(--text)}
-     .hpmini{height:10px;border-radius:999px;background:#0d1320;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
-     .hpmini>div{height:100%;background:linear-gradient(90deg,#34d399,#ffd166);width:100%}
-     .ko{color:#ff9aa2;font-weight:800;letter-spacing:.3px}
-     .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-     .note{color:var(--muted);font-size:12px;margin-top:6px}
-     .empty{color:var(--muted);text-align:center;padding:20px;border:1px dashed rgba(255,255,255,.12);border-radius:12px}
-   </style>
- </head>
- <body>
-   <header>
-     <div class="title">Crowd DPS <span>· Boss Rush</span></div>
-     <div class="toolbar">
-       <div class="pill">Cash: <span class="value" id="cash">$0.00</span></div>
-       <div class="pill">Boss Lvl: <span class="value" id="bossLevel">1</span></div>
-       <div class="pill">Roll Cost: <span class="value" id="rollCost">$0.00</span></div>
--      <div class="pill">Roll Cost: <span class="value" id="rollCost">$0.00</span></div>
-       <button id="resetBtn" class="btn small" title="Reset local progress">Reset</button>
-     </div>
-   </header>
- 
-   <main>
-     <section class="panel" id="allPlayersPanel" style="order:1">
-       <h2>All Players (from Google Sheets)</h2>
-       <div id="players" class="cards"></div>
-       <div id="playersEmpty" class="empty" style="display:none">No players loaded yet.</div>
-       <div class="note">
-         Players sheet: headers A–G = F-Tier→SS-Tier, row 2+ = usernames. Stats sheet: same headers; row 2 = HP per tier; row 3 = DPS per tier.
-       </div>
-     </section>
- 
-     <section class="panel" id="bossPanel" style="order:0">
-       <h2>Boss Arena</h2>
-       <div class="boss">
-         <div class="hero">
-           <div class="row" style="justify-content:space-between;align-items:baseline">
--            <div><div class="name" style="font-size:20px;font-weight:900" id="bossName">—</div><div class="muted" id="bossStats">HP — / —</div></div>
-+            <div>
-+              <div class="name" style="font-size:20px;font-weight:900" id="bossName">—</div>
-+              <div class="muted" id="bossStats">HP — / —</div>
-+            </div>
-             <div class="badge" id="bossBadge">Level 1</div>
-           </div>
-           <div class="hpmini" style="height:16px"><div id="hpFill" style="width:100%"></div></div>
-           <div class="grid2">
-             <div class="pill">Your DPS: <span class="value" id="yourDPS">0</span></div>
-             <div class="pill">Your HP: <span class="value" id="yourHP">0</span></div>
-           </div>
-           <div class="toolbar">
-             <button id="fightBtn" class="btn brand">Start Fight</button>
-             <button id="newBossBtn" class="btn">New Boss</button>
-             <button id="freeCardBtn" class="btn neon" title="First-time bonus: random F-Tier">Get Free Common Card</button>
-             <button id="recruitBtn" class="btn" title="Roll a random card by rarity">Recruit (Roll)</button>
-           </div>
-           <div class="note" id="fightNote">Win to earn cash. Rewards grow slowly as bosses scale up.</div>
-         </div>
-       </div>
-     </section>
- 
-     <section class="panel" id="teamPanel" style="order:2">
-       <h2>Your Team</h2>
-       <div id="team" class="cards"></div>
-       <div id="teamEmpty" class="empty">You have no cards yet.</div>
-     </section>
-   </main>
- 
-   <script>
-   // === CONFIG ===
-   const SHEET_PLAYERS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMUnfamouCORKPavgJqVoMsSNDyx-emsTNi5dJw2DNx1IcWnPH-I6tgeN9EsAWoLXCUSmWpe5JyfZn/pub?output=csv";
-   const SHEET_STATS_URL   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRgc7Pm81icSxeJP3dySkafpNEyAElWNXiHUgue3wLcNUsanku5Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
- 
--  const RECRUIT_COST = 0.00; // set > 0 to charge per roll
-   const TIER_ORDER = ["F-Tier","D-Tier","C-Tier","B-Tier","A-Tier","S-Tier","SS-Tier"];
--  const TIER_COLORS = {"F-Tier":"#94a3b8","D-Tier":"#a78bfa","C-Tier":"#6const TIER_BASE_WEIGHTS = {"F-Tier":0.45,"D-Tier":0.20,"C-Tier":0.14,"B-Tier":0.09,"A-Tier":0.06,"S-Tier":0.04,"SS-Tier":0.02};
--  // Fairness knobs (pity + economy)
--  const FAIRNESS = {
--    cost: { base: 0.20, perRecruit: 0.02, dailyFree: 1, maxCost: 1.00 }, // dollars
--    pity: {
--      A:  { softStart: 8,  hard: 20, softStep: 0.15 },   // boost A/S/SS from roll 9; hard guarantee A+ at 20
--      S:  { softStart: 20, hard: 45, softStep: 0.20 },   // boost S/SS from roll 21; hard guarantee S+ at 45
--      SS: { softStart: 40, hard: 80, softStep: 0.25 }    // boost SS from roll 41; hard guarantee SS at 80
--    }
--  };":0.45,"D-Tier":0.20,"C-Tier":0.14,"B-Tier":0.09,"A-Tier":0.06,"S-Tier":0.04,"SS-Tier":0.02};
--  // Fairness knobs (pity + economy)
-+  const TIER_COLORS = {
-+    "F-Tier":"#94a3b8",
-+    "D-Tier":"#a78bfa",
-+    "C-Tier":"#60a5fa",
-+    "B-Tier":"#34d399",
-+    "A-Tier":"#facc15",
-+    "S-Tier":"#fb7185",
-+    "SS-Tier":"#f97316"
-+  };
-+  const TIER_BASE_WEIGHTS = {"F-Tier":0.45,"D-Tier":0.20,"C-Tier":0.14,"B-Tier":0.09,"A-Tier":0.06,"S-Tier":0.04,"SS-Tier":0.02};
-   const FAIRNESS = {
--    cost: { base: 0.20, perRecruit: 0.02, dailyFree: 1, maxCost: 1.00 }, // dollars
-+    cost: { base: 0.20, perRecruit: 0.02, dailyFree: 1, maxCost: 1.00 },
-     pity: {
--      A:  { softStart: 8,  hard: 20, softStep: 0.15 },   // boost A/S/SS from roll 9; hard guarantee A+ at 20
--      S:  { softSlet hpMap = {};      // runtime HP per card id for current boss
--  // Pity & daily economy
--  let pity = { A: 0, S: 0, SS: 0 };
--  let recruitsToday = 0; let lastRecruitDay = ''; 21; hard guarantee S+ at 45
--      SS: { softStart: 40, hard: 80, softStep: 0.25 }    // boost SS from roll 41; hard guarantee SS at 80
-+      A:  { softStart: 8,  softStep: 0.15, hard: 20 },
-+      S:  { softStart: 20, softStep: 0.20, hard: 45 },
-+      SS: { softStart: 40, softStep: 0.25, hard: 80 }
-     }
-   };
- 
--  // === STATE ===
--  let tiers = {};      // per-tier {hp,dps,players[]}
--  let players = [];    // flat [{id,name,tier,hp,dps}]
--  let collectionIds = []; // owned cards (no duplicates)
--  let teamIds = [];        // == collectionIds (auto)
--  let cash = 0, bossLevel = 1;
--  let boss = null;     // { name, level, maxHp, hp, dps }
--  let fightingconst idFrom = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-+  // === UTIL ===
-+  const $ = (sel)=> document.querySelector(sel);
-+  const el = (tag, props={}, children=[])=>{
-+    const node=document.createElement(tag);
-+    Object.entries(props).forEach(([k,v])=>{
-+      if (k in node) node[k]=v; else node.setAttribute(k,v);
-+    });
-+    ([]).concat(children).filter(Boolean).forEach(child=> node.append(child));
-+    return node;
-+  };
-+  const clamp = (v,min,max)=> Math.min(max, Math.max(min,v));
-+  const pick = arr => arr[Math.floor(Math.random()*arr.length)];
-+  const rand = (a,b)=> a + Math.random()*(b-a);
-+  const fmtNum = n => Number(n||0).toLocaleString();
-+  const fmtCash = n => `$${Number(n||0).toFixed(2)}`;
-+  const idFrom = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-   const todayKey = ()=> new Date().toISOString().slice(0,10);
--  function ensureDailyCounters(){ const today = todayKey(); if (lastRecruitDay !== today){ lastRecruitDay = today; recruitsToday = 0; save(); } }
--  function totalRecruits(){ return collectionIds.length; }
--  function currentRecruitCost(){ ensureDailyCounters(); const freeLeft = Math.max(0, FAIRNESS.cost.dailyFree - recruitsToday); if (freeLeft>0) return 0; const scaled = FAIRNESS.cost.base + FAIRNESS.cost.perRecruit * totalRecruits(); return Math.min(FAIRNESS.cost.maxCost, Math.round(scaled*100)/100); }
--  function updateRecruitCostUI(){ const elc = document.getElementById('rollCost'); if (elc) elc.textContent = fmtCash(currentRecruitCost()); }
--  function dynamicTierWeights(){ const weights = { ...TIER_BASE_WEIGHTS }; const { A:PA, S:PS, SS:PSS } = FAIRNESS.pity; if (pity.A >= PA.softStart){ const steps=(pity.A-PA.softStart+1); const mult=1+PA.softStep*steps; weights['A-Tier']*=mult; weights['S-Tier']*=mult; weights['SS-Tier']*=mult; } if (pity.S >= PS.softStart){ const steps=(pity.S-PS.softStart+1); const mult=1+PS.softStep*steps; weights['S-Tier']*=mult; weights['SS-Tier']*=mult; } if (pity.SS >= PSS.softStart){ const steps=(pity.SS-PSS.softStart+1); const mult=1+PSS.softStep*steps; weights['SS-Tier']*=mult; } return weights; }
--  function pickTierWithPity(){ const { A:PA, S:PS, SS:PSS } = FAIRNESS.pity; const availByTier = t => players.some(p=> p.tier===t && !collectionIds.includes(p.id)); if (pity.SS >= PSS.hard && availByTier('SS-Tier')) return 'SS-Tier'; if (pity.S >= PS.hard){ const tiersHigh=['SS-Tier','S-Tier']; const t=tiersHigh.find(availByTier); if(t) return t; } if (pity.A >= PA.hard){ const tiersA=['SS-Tier','S-Tier','A-Tier']; const t=tiersA.find(availByTier); if(t) return t; } const weights = dynamicTierWeights(); const avail = Object.entries(weights).filter(([t,w])=> w>0 && players.some(p=> p.tier===t && !collectionIds.includes(p.id))); if(!avail.length) return null; const total = avail.reduce((a,[,w])=> a+w,0); let r=Math.random()*total; for(const [t,w] of avail){ r-=w; if(r<=0) return t; } return avail[avail.length-1][0]; }
--  function bumpPity(tier){ if (tier==='SS-Tier'){ pity.SS=0; pity.S=0; pity.A=0; } else if (tier==='S-Tier'){ pity.S=0; pity.A=0; pity.SS++; } else if (tier==='A-Tier'){ pity.A=0; pity.S++; pity.SS++; } else { pity.A++; pity.S++; pity.SS++; } }fighfunction save(){
--    localStorage.setItem('cdps.cash',String(cash));
--    localStorage.setItem('cdps.bossLevel',String(bossLevel));
--    localStorage.setItem('cdps.collection',JSON.stringify(collectionIds));
--    if (boss) localStorage.setItem('cdps.boss',JSON.stringify(boss));
-+
-+  // === STATE ===
-+  let tiers = {};
-+  let players = [];
-+  let collectionIds = [];
-+  let teamIds = [];
-+  let hpMap = {};
-+  let cash = 0;
-+  let bossLevel = 1;
-+  let boss = null;
-+  let pity = {A:0,S:0,SS:0};
-+  let recruitsToday = 0;
-+  let lastRecruitDay = '';
-+  let fighting = false;
-+  let fightTimer = null;
-+
-+  // === PERSISTENCE ===
-+  function save(){
-+    localStorage.setItem('cdps.cash', String(cash));
-+    localStorage.setItem('cdps.bossLevel', String(bossLevel));
-+    localStorage.setItem('cdps.collection', JSON.stringify(collectionIds));
-     localStorage.setItem('cdps.pity', JSON.stringify(pity));
-     localStorage.setItem('cdps.recruitsToday', String(recruitsToday));
--    localStorage.setItem('cdps.lastRecruitDay', lastRecruitDay||'');
--  }sigfunction load(){
--    cash=parseFloat(localStorage.getItem('cdps.cash')||'0')||0;
--    bossLevel=parseInt(localStorage.getItem('cdps.bossLevel')||'1')||1;
--    collectionIds=JSON.parse(localStorage.getItem('cdps.collection')||'[]');
--    try{boss=JSON.parse(localStorage.getItem('cdps.boss')||'null');}catch{boss=null}
--    try{pity=JSON.parse(localStorage.getItem('cdps.pity')||'{"A":0,"S":0,"SS":0}');}catch{pity={A:0,S:0,SS:0}}
--    recruitsToday=parseInt(localStorage.getItem('cdps.recruitsToday')||'0')||0;
--    lastRecruitDay=localStorage.getItem('cdps.lastRecruitDay')||'';
--  }(Math.random()*arr.length)];
--  const idFrom = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-+    localStorage.setItem('cdps.lastRecruitDay', lastRecruitDay || '');
-+    if (boss) localStorage.setItem('cdps.boss', JSON.stringify(boss));
-+  }
-+  function load(){
-+    cash = parseFloat(localStorage.getItem('cdps.cash')||'0')||0;
-+    bossLevel = parseInt(localStorage.getItem('cdps.bossLevel')||'1')||1;
-+    collectionIds = JSON.parse(localStorage.getItem('cdps.collection')||'[]');
-+    recruitsToday = parseInt(localStorage.getItem('cdps.recruitsToday')||'0')||0;
-+    lastRecruitDay = localStorage.getItem('cdps.lastRecruitDay')||'';
-+    try{ pity = JSON.parse(localStorage.getItem('cdps.pity')||'{"A":0,"S":0,"SS":0}'); }
-+    catch{ pity = {A:0,S:0,SS:0}; }
-+    try{ boss = JSON.parse(localStorage.getItem('cdps.boss')||'null'); }
-+    catch{ boss = null; }
-+  }
- 
--  function save(){ localStorage.Float(localStorage.getItem('cdps.cash')||'0')||0; bossLevel=parseInt(localStorage.getItem('cdps.bossLevel')||'1')||1; collectionIds=JSON.parse(localStorage.getItem('cdps.collection')||'[]'); try{boss=JSON.parse(localStorage.getItem('cdps.boss')||'null');}catch{boss=null} }
-+  // === FAIRNESS HELPERS ===
-+  function ensureDailyCounters(){
-+    const today = todayKey();
-+    if (lastRecruitDay !== today){
-+      lastRecruitDay = today;
-+      recruitsToday = 0;
-+      save();
-+    }
-+  }
-+  function totalRecruits(){ return collectionIds.length; }
-+  function currentRecruitCost(){
-+    ensureDailyCounters();
-+    const freeLeft = Math.max(0, FAIRNESS.cost.dailyFree - recruitsToday);
-+    if (freeLeft>0) return 0;
-+    const scaled = FAIRNESS.cost.base + FAIRNESS.cost.perRecruit * totalRecruits();
-+    return Math.min(FAIRNESS.cost.maxCost, Math.round(scaled*100)/100);
-+  }
-+  function updateRecruitCostUI(){
-+    const elCost = $('#rollCost');
-+    if (elCost) elCost.textContent = fmtCash(currentRecruitCost());
-+  }
-+  function dynamicTierWeights(){
-+    const weights = { ...TIER_BASE_WEIGHTS };
-+    const {A:PA,S:PS,SS:PSS} = FAIRNESS.pity;
-+    if (pity.A >= PA.softStart){
-+      const steps = pity.A - PA.softStart + 1;
-+      const mult = 1 + PA.softStep*steps;
-+      weights['A-Tier']*=mult; weights['S-Tier']*=mult; weights['SS-Tier']*=mult;
-+    }
-+    if (pity.S >= PS.softStart){
-+      const steps = pity.S - PS.softStart + 1;
-+      const mult = 1 + PS.softStep*steps;
-+      weights['S-Tier']*=mult; weights['SS-Tier']*=mult;
-+    }
-+    if (pity.SS >= PSS.softStart){
-+      const steps = pity.SS - PSS.softStart + 1;
-+      const mult = 1 + PSS.softStep*steps;
-+      weights['SS-Tier']*=mult;
-+    }
-+    return weights;
-+  }
-+  function pickTierWithPity(){
-+    const {A:PA,S:PS,SS:PSS} = FAIRNESS.pity;
-+    const available = tier => players.some(p=> p.tier===tier && !collectionIds.includes(p.id));
-+    if (pity.SS >= PSS.hard && available('SS-Tier')) return 'SS-Tier';
-+    if (pity.S >= PS.hard){
-+      const t = ['SS-Tier','S-Tier'].find(available);
-+      if (t) return t;
-+    }
-+    if (pity.A >= PA.hard){
-+      const t = ['SS-Tier','S-Tier','A-Tier'].find(available);
-+      if (t) return t;
-+    }
-+    const weights = dynamicTierWeights();
-+    const pool = Object.entries(weights)
-+      .filter(([tier,weight])=> weight>0 && available(tier));
-+    if (!pool.length) return null;
-+    const total = pool.reduce((sum,[,w])=> sum+w,0);
-+    let roll = Math.random()*total;
-+    for (const [tier, weight] of pool){
-+      roll -= weight;
-+      if (roll <= 0) return tier;
-+    }
-+    return pool[pool.length-1][0];
-+  }
-+  function bumpPity(tier){
-+    if (tier==='SS-Tier'){
-+      pity = {A:0,S:0,SS:0};
-+    } else if (tier==='S-Tier'){
-+      pity.S = 0;
-+      pity.A = 0;
-+      pity.SS += 1;
-+    } else if (tier==='A-Tier'){
-+      pity.A = 0;
-+      pity.S += 1;
-+      pity.SS += 1;
-+    } else {
-+      pity.A += 1;
-+      pity.S += 1;
-+      pity.SS += 1;
-+    }
-+  }
- 
--  function parseCSV(text){ return text.trim().split(/
--?
--/).map(r=> r.split(',').map(c=> c.replace(/^\"|\"$/g,'').trim())); }
-+  // === DATA BUILDERS ===
-+  function parseCSV(text){
-+    if (!text) return [];
-+    return text.trim().split(/\r?\n/).map(row=> row.split(',').map(c=> c.replace(/^"|"$/g,'').trim()));
-+  }
-   function mapHeaderToTiers(headers){
--    function canonicalTier(h){
--      const k a') return 'A-Tier';
--      if (k==='stier'||k==='s') return 'S-Tier';
--      if (k==='sstier'||k==='ss') return 'SS-Tier';
-+    const canonical = h =>{
-+      const k=(h||'').toString().toLowerCase().replace(/[^a-z]/g,'');
-+      if (k.includes('ftier')||k==='f') return 'F-Tier';
-+      if (k.includes('dtier')||k==='d') return 'D-Tier';
-+      if (k.includes('ctier')||k==='c') return 'C-Tier';
-+      if (k.includes('btier')||k==='b') return 'B-Tier';
-+      if (k.includes('atier')||k==='a') return 'A-Tier';
-+      if (k.includes('sstier')||k==='ss') return 'SS-Tier';
-+      if (k.includes('stier')||k==='s') return 'S-Tier';
-       return null;
-+    };
-+    return headers.map(canonical);
-+  }
-+  function findHeaderRow(matrix){
-+    const maxScan = Math.min(5, matrix.length);
-+    let bestRow = 0;
-+    let bestHits = -1;
-+    for (let r=0;r<maxScan;r++){
-+      const hits = (matrix[r]||[]).map(h=> mapHeaderToTiers([h])[0]).filter(Boolean).length;
-+      if (hits>bestHits){ bestHits = hits; bestRow = r; }
-     }
--    return headers.map(h=> canonicalTier(h));
-+    return bestRow;
-   }
--
-   function buildFromSheets(statsMatrix, playersMatrix){
--    tiers={}; TIER_ORDER.forEach(t=> tiers[t]={hp:100,dps:5,players:[]});
-+    tiers = {};
-+    TIER_ORDER.forEach(tier=> tiers[tier] = {hp:100, dps:5, players:[]});
- 
--    function findHeaderRow(matrix){
--      const maxScan = Math.min(5, matrix.length);
--      let bestRow = 0, bestHits = -1;
--      for (let r=0;r<maxScan;r++){
--        const hits = (matrix[r]||[]).map(h=> (h||'').toString()).filter(h=> mapHeaderToTiers([h])[0]).length;
--        if (hits>bestHits){ bestHits=hits; bestRow=r; }
--      }
--      return bestRow;
--    }
--
--    // Stats: row 2=HP, row 3=DPS relative to its header row
-     if (statsMatrix && statsMatrix.length){
--      const sStart = findHeaderRow(statsMatrix);
--      const sHeaders = statsMatrix[sStart] || [];
--      const sCols = mapHeaderToTiers(sHeaders);
--      const hpRow = statsMatrix[sStart+1] || [];
--      const dpsRow = statsMatrix[sStart+2] || [];
--      sCols.forEach((tierName,i)=>{
--        if(!tierName) return;
--        const hp=parseFloat(hpRow[i]); const dps=parseFloat(dpsRow[i]);
--        if(!Number.isNaN(hp)) tiers[tierName].hp=hp;
--        if(!Number.isNaN(dps)) tiers[tierName].dps=dps;
-+      const start = findHeaderRow(statsMatrix);
-+      const headers = statsMatrix[start] || [];
-+      const cols = mapHeaderToTiers(headers);
-+      const hpRow = statsMatrix[start+1] || [];
-+      const dpsRow = statsMatrix[start+2] || [];
-+      cols.forEach((tierName, idx)=>{
-+        if (!tierName) return;
-+        const hp = parseFloat(hpRow[idx]);
-+        const dps = parseFloat(dpsRow[idx]);
-+        if (!Number.isNaN(hp)) tiers[tierName].hp = hp;
-+        if (!Number.isNaN(dps)) tiers[tierName].dps = dps;
-       });
-     }
- 
--    // Players: from header row + 1 onward are names
-     if (playersMatrix && playersMatrix.length){
--      const pStart = findHeaderRow(playersMatrix);
--      const pHeaders = playersMatrix[pStart] || [];
--      const pCols = mapHeaderToTiers(pHeaders);
--      for (let r=pStart+1;r<playersMatrix.length;r++){
--        const row=playersMatrix[r]||[];
--        for(let c=0;c<row.length;c++){
--          const t=pCols[c]; if(!t) continue;
--          const name=(row[c]||'').trim(); if(!name) continue;
--          if(!tiers[t].players.includes(name)) tiers[t].players.push(name);
-+      const start = findHeaderRow(playersMatrix);
-+      const headers = playersMatrix[start] || [];
-+      const cols = mapHeaderToTiers(headers);
-+      for (let r=start+1;r<playersMatrix.length;r++){
-+        const row = playersMatrix[r] || [];
-+        for (let c=0;c<row.length;c++){
-+          const tier = cols[c];
-+          if (!tier) continue;
-+          const name = (row[c]||'').trim();
-+          if (!name || tiers[tier].players.includes(name)) continue;
-+          tiers[tier].players.push(name);
-         }
-       }
-     }
- 
--    players=[];
--    for(const t of TIER_ORDER){ const baseHp=tiers[t].hp, baseDps=tiers[t].dps; for(const name of tiers[t].players){ players.push({id:idFrom(name+"-"+t), name, tier:t, hp:baseHp, dps:baseDps}); } }
-+    players = [];
-+    for (const tier of TIER_ORDER){
-+      const baseHp = tiers[tier].hp;
-+      const baseDps = tiers[tier].dps;
-+      for (const name of tiers[tier].players){
-+        players.push({
-+          id: idFrom(`${name}-${tier}`),
-+          name,
-+          tier,
-+          hp: baseHp,
-+          dps: baseDps
-+        });
-+      }
-+    }
-   }
- 
-   // === RENDER ===
--  function tierBadge(t){ const b=el('span',{className:'badge tier'}); b.textContent=t; b.style.borderColor=TIER_COLORS[t]||'rgba(255,255,255,.2)'; b.style.color=TIER_COLORS[t]||'#cbd5e1'; b.style.background='rgba(255,255,255,.03)'; return b; }
--
--  function playerCard(p, mode){
--    const card=el('div',{className:'card', id:`card-${p.id}`});
--    const top=el('div',{className:'row'});
--    top.append(el('div',{className:'name',textContent:p.name}), tierBadge(p.tier));
--    const stats=el('div',{className:'row'});
--    stats.append(el('div',{className:'stat',innerHTML:`HP <span class="v">${fmtNum(p.hp)}</span>`}), el('div',{className:'stat',innerHTML:`DPS <span class="v">${fmtNum(p.dps)}</span>`}));
--    card.append(top,stats);
-+  function tierBadge(tier){
-+    const badge = el('span',{className:'badge tier'});
-+    badge.textContent = tier;
-+    badge.style.borderColor = TIER_COLORS[tier] || 'rgba(255,255,255,.2)';
-+    badge.style.color = TIER_COLORS[tier] || '#cbd5e1';
-+    badge.style.background = 'rgba(255,255,255,.05)';
-+    return badge;
-+  }
-+  function playerCard(player, mode){
-+    const card = el('div',{className:'card', id:`card-${player.id}`});
-+    const top = el('div',{className:'row'});
-+    top.append(el('div',{className:'name', textContent:player.name}), tierBadge(player.tier));
-+    const stats = el('div',{className:'row'});
-+    stats.append(
-+      el('div',{className:'stat', innerHTML:`HP <span class="v">${fmtNum(player.hp)}</span>`}),
-+      el('div',{className:'stat', innerHTML:`DPS <span class="v">${fmtNum(player.dps)}</span>`})
-+    );
-+    card.append(top, stats);
-     if (mode==='team'){
--      const hpRow=el('div',{className:'row'});
--      const hpText=el('div',{className:'stat', id:`hptext-${p.id}`});
--      hpText.innerHTML = `HP <span class="v">${fmtNum(hpMap[p.id]??p.hp)}</span>`;
--      const bar=el('div',{className:'hpmini'}); const fill=el('div',{id:`bar-${p.id}`}); bar.append(fill);
--      const status=el('div',{id:`status-${p.id}`, className:'badge', style:'opacity:.8'});
--      hpRow.append(hpText, status); card.append(hpRow, bar);
-+      const hpRow = el('div',{className:'row'});
-+      const hpText = el('div',{className:'stat', id:`hptext-${player.id}`});
-+      hpText.innerHTML = `HP <span class="v">${fmtNum(hpMap[player.id] ?? player.hp)}</span>`;
-+      const bar = el('div',{className:'hpmini'});
-+      const fill = el('div',{id:`bar-${player.id}`});
-+      bar.append(fill);
-+      const status = el('div',{id:`status-${player.id}`, className:'badge', style:'opacity:.8'});
-+      hpRow.append(hpText, status);
-+      card.append(hpRow, bar);
-     }
-     return card;
-   }
--
-   function renderPlayers(){
--    const wrap=$('#players'); wrap.innerHTML=''; if(!players.length){
--      const msg = 'No players parsed. Check: 1) Players sheet headers include F/D/C/B/A/S/SS (any style), 2) Usernames start on row 2, 3) Stats sheet row 2=HP row 3=DPS.';
--      const empty = $('#playersEmpty'); if (empty){ empty.style.display=''; empty.textContent = msg; }
--      console.debug('[CrowdDPS] Players empty. Inspect headers/rows.');
-+    const wrap = $('#players');
-+    wrap.innerHTML='';
-+    if (!players.length){
-+      const empty = $('#playersEmpty');
-+      if (empty){
-+        empty.style.display='';
-+        empty.textContent = 'No players parsed. Ensure sheet headers include the tier names and that rows begin at row 2.';
-+      }
-       return;
--    } $('#playersEmpty').style.display='none';
--    const grouped=Object.fromEntries(TIER_ORDER.map(t=>[t,[]])); players.forEach(p=> grouped[p.tier].push(p));
--    for(const t of TIER_ORDER){ const list=grouped[t]; if(!list.length) continue; const header=el('div',{className:'card'}); const row=el('div',{className:'row'}); row.append(el('div',{className:'name',textContent:`${t} · ${list.lengthfunction renderTeam(){
--    teamIds=[...collectionIds]; // team == owned
--    const wrap=$('#team'); wrap.innerHTML='';
--    const team=teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean);
--    if(!team.length){ $('#teamEmpty').style.display=''; } else { $('#teamEmpty').style.display='none'; team.forEach(p=> wrap.append(playerCard(p,'team'))); }
--    updateTeamHPUI();
--    const dps=team.reduce((a,p)=>a+p.dps,0), hp=team.reduce((a,p)=>a+(hpMap[p.id]??p.hp),0);
--    $('#yourDPS').textContent=fmtNum(dps); $('#yourHP').textContent=fmtNum(hp);
--    updateRecruitCostUI();
--  }team=teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean);
--    if(!team.length){ $('#teamEmpty').style.display=''; } else { $('#teamEmpty').style.display='none'; team.forEach(p=> wrap.append(playerCard(p,'team'))); }
--    updateTeamHPUI();
--    const dps=team.reduce((a,p)=>a+p.dps,0), hp=team.reduce((a,p)=>a+(hpMap[p.id]??p.hp),0);
--    $('#yourDPS').textContent=fmtNum(dps); $('#yourHP').textContent=fmtNum(hp);
-+    }
-+    $('#playersEmpty').style.display='none';
-+    const grouped = Object.fromEntries(TIER_ORDER.map(t=>[t,[]]));
-+    players.forEach(p=> grouped[p.tier].push(p));
-+    for (const tier of TIER_ORDER){
-+      const list = grouped[tier];
-+      if (!list.length) continue;
-+      const header = el('div',{className:'card'});
-+      header.append(el('div',{className:'name', textContent:`${tier} · ${list.length}` }));
-+      wrap.append(header);
-+      list.forEach(player=> wrap.append(playerCard(player,'collection')));
-+    }
-   }
--
-   function updateTeamHPUI(){
--    for(const id of teamIds){ const p=players.find(x=>x.id===id); if(!p) continue; const cur=hpMap[id]??p.hp; const pct=clamp((cur/p.hp)*100,0,100); const bar=$(`#bar-${id}`); if(bar) bar.style.width=pct+'%'; const hptext=$(`#hptext-${id}`); if(hptext) hptext.innerHTML=`HP <span class="v">${fmtNum(Math.max(0,cur))}</span>`; const status=$(`#status-${id}`); if(status) status.textContent = cur<=0 ? 'KO' : ''; }
-+    for (const id of teamIds){
-+      const player = players.find(p=> p.id===id);
-+      if (!player) continue;
-+      const currentHp = hpMap[id] ?? player.hp;
-+      const pct = clamp((currentHp/player.hp)*100,0,100);
-+      const bar = $(`#bar-${id}`);
-+      if (bar) bar.style.width = `${pct}%`;
-+      const hpText = $(`#hptext-${id}`);
-+      if (hpText) hpText.innerHTML = `HP <span class="v">${fmtNum(Math.max(0,currentHp))}</span>`;
-+      const status = $(`#status-${id}`);
-+      if (status) status.textContent = currentHp<=0 ? 'KO' : '';
-+    }
-+  }
-+  function renderTeam(){
-+    teamIds = [...collectionIds];
-+    const wrap = $('#team');
-+    wrap.innerHTML='';
-+    const team = teamIds.map(id=> players.find(p=> p.id===id)).filter(Boolean);
-+    if (!team.length){
-+      $('#teamEmpty').style.display='';
-+    } else {
-+      $('#teamEmpty').style.display='none';
-+      team.forEach(p=> wrap.append(playerCard(p,'team')));
-+    }
-+    updateTeamHPUI();
-+    const totalDps = team.reduce((sum,p)=> sum + p.dps,0);
-+    const totalHp = team.reduce((sum,p)=> sum + (hpMap[p.id] ?? p.hp),0);
-+    $('#yourDPS').textContent = fmtNum(totalDps);
-+    $('#yourHP').textContent = fmtNum(totalHp);
-+    updateRecruitCostUI();
-   }
- 
-   // === COLLECTION ===
--  function addToCollection(id){ if(!collectionIds.includes(id)) collectionIds.push(id); save(); renderPlayers(); renderTeam(); }
-+  function addToCollection(id){
-+    if (!collectionIds.includes(id)) collectionIds.push(id);
-+    save();
-+    renderPlayers();
-+    renderTeam();
-+  }
- 
-   // === BOSS ===
--  const BOSS_NAMES=['Rust-Eaten Golem','Gelatinous Overmind','Cave Hydra','Skull Furnace','Storm Djinn','Ancient Treant','Hollow Colossus','Obsidian Wyrm','Clockwork Behemoth','Astral Leech'];
-+  const BOSS_NAMES = ['Rust-Eaten Golem','Gelatinous Overmind','Cave Hydra','Skull Furnace','Storm Djinn','Ancient Treant','Hollow Colossus','Obsidian Wyrm','Clockwork Behemoth','Astral Leech'];
-   function genBoss(level, teamDps=1, teamHp=1){
--    const name=`${pick(BOSS_NAMES)} ${level>=10?"[Ω]":""}`.trim();
--    const targetTTK=18 + level*1.2; // seconds vs team DPS
--    const difficulty=1 + level*0.18; const variance=rand(0.9,1.1);
--    const maxHp=Math.max(50, teamDps * targetTTK * difficulty * variance);
--    // Boss DPS tuned so team would wipe in ~ targetTTK*1.1 on average if you afk
--    const bossDps= Math.max(1, teamHp / (targetTTK*1.1)) * rand(0.9,1.1);
-+    const name = `${pick(BOSS_NAMES)}${level>=10?' [Ω]':''}`;
-+    const targetTTK = 18 + level*1.1;
-+    const difficulty = 1 + level*0.18;
-+    const variance = rand(0.9,1.1);
-+    const maxHp = Math.max(50, teamDps * targetTTK * difficulty * variance);
-+    const bossDps = Math.max(1, teamHp / (targetTTK*1.1)) * rand(0.9,1.1);
-     return { name, level, maxHp:Math.round(maxHp), hp:Math.round(maxHp), dps:bossDps };
-   }
--  function rewardFor(level){ const base=0.10, growth=0.03*level, variance=rand(0.95,1.05); return Math.round((base+growth)*variance*100)/100; }
--  function renderBoss(){ if(!boss) return; $('#bossName').textContent=boss.name; $('#bossLevel').textContent=boss.level; $('#bossBadge').textContent=`Level ${boss.level}`; $('#bossStats').textContent=`HP ${Math.ceil(boss.hp)} / ${boss.maxHp}`; $('#hpFill').style.width = clamp((boss.hp/boss.maxHp)*100,0,100)+'%'; }
--  function newBoss(){ const team=teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean); hpMap={}; team.forEach(p=> hpMap[p.id]=p.hp); const dps=Math.max(1, team.reduce((a,p)=>a+p.dps,0)); const thp=team.reduce((a,p)=>a+p.hp,0); boss=genBoss(bossLevel,dps,thp); save(); renderBoss(); renderTeam(); $('#fightNote').textContent='A new foe appears!'; }
-+  function rewardFor(level){
-+    const base = 0.12;
-+    const growth = 0.035 * level;
-+    const variance = rand(0.95,1.05);
-+    return Math.round((base + growth) * variance * 100)/100;
-+  }
-+  function renderBoss(){
-+    if (!boss) return;
-+    $('#bossName').textContent = boss.name;
-+    $('#bossLevel').textContent = boss.level;
-+    $('#bossBadge').textContent = `Level ${boss.level}`;
-+    $('#bossStats').textContent = `HP ${Math.ceil(boss.hp)} / ${boss.maxHp}`;
-+    $('#hpFill').style.width = `${clamp((boss.hp/boss.maxHp)*100,0,100)}%`;
-+  }
-+  function newBoss(){
-+    const team = teamIds.map(id=> players.find(p=> p.id===id)).filter(Boolean);
-+    hpMap = {};
-+    team.forEach(p=> hpMap[p.id] = p.hp);
-+    const dps = Math.max(1, team.reduce((sum,p)=> sum + p.dps,0));
-+    const totalHp = team.reduce((sum,p)=> sum + p.hp,0) || 100;
-+    boss = genBoss(bossLevel, dps, totalHp);
-+    save();
-+    renderBoss();
-+    renderTeam();
-+    $('#fightNote').textContent = 'A new foe appears!';
-+  }
- 
-   // === COMBAT ===
--  function livingIds(){ return teamIds.filter(id=> (hpMap[id]??0) > 0); }
-+  function livingIds(){
-+    return teamIds.filter(id=> (hpMap[id] ?? 0) > 0);
-+  }
-+  function stopFight(){
-+    if (fightTimer) clearInterval(fightTimer);
-+    fightTimer = null;
-+    fighting = false;
-+    $('#fightBtn').disabled = false;
-+    $('#newBossBtn').disabled = false;
-+  }
-   function startFight(){
--    if(fighting || !boss) return; const team=teamIds.map(id=> players.find(p=>p.id===id)).filter(Boolean); const dps=team.reduce((a,p)=>a+p.dps,0); if(dps<=0){ alert('Your team has 0 DPS. Recruit at least one card.'); return; }
--    fighting=true; $('#fightBtn').disabled=true; $('#newBossBtn').disabled=true;
--    const tickMs=100; fightTimer=setInterval(()=>{
--      // Your damage to boss
--      boss.hp=Math.max(0, boss.hp - dps*(tickMs/1000));
--      // Boss damage to a random living unit
--      const alive=livingIds(); if(alive.length){ const targetId=pick(alive); hpMap[targetId]=Math.max(0, (hpMap[targetId]??0) - boss.dps*(tickMs/1000)); }
--      updateTeamHPUI(); renderBoss();
--      if(boss.hp<=0){
--        clearInterval(fightTimer); fighting=false; $('#fightBtn').disabled=false; $('#newBossBtn').disabled=false;
--        const reward=rewardFor(boss.level); cash+=reward; bossLevel+=1; save(); $('#cash').textContent=fmtCash(cash); $('#fightNote').textContent=`Victory! You earned ${fmtCash(reward)}.`;
--      } else if(livingIds().length===0){
--        clearInterval(fightTimer); fighting=false; $('#fightBtn').disabled=false; $('#newBossBtn').disabled=false; $('#fightNote').textContent='Defeat! All allies fell. Click New Boss to revive everyone.';
-+    if (fighting || !boss) return;
-+    const team = teamIds.map(id=> players.find(p=> p.id===id)).filter(Boolean);
-+    const dps = team.reduce((sum,p)=> sum + p.dps,0);
-+    if (dps <= 0){
-+      alert('Your team has no DPS. Recruit at least one card.');
-+      return;
-+    }
-+    fighting = true;
-+    $('#fightBtn').disabled = true;
-+    $('#newBossBtn').disabled = true;
-+    const tickMs = 100;
-+    fightTimer = setInterval(()=>{
-+      boss.hp = Math.max(0, boss.hp - dps * (tickMs/1000));
-+      const alive = livingIds();
-+      if (alive.length){
-+        const target = pick(alive);
-+        const baseHp = players.find(p=> p.id===target)?.hp || 0;
-+        hpMap[target] = Math.max(0, (hpMap[target] ?? baseHp) - boss.dps*(tickMs/1000));
-+      }
-+      updateTeamHPUI();
-+      renderBoss();
-+      if (boss.hp <= 0){
-+        stopFight();
-+        const reward = rewardFor(boss.level);
-+        cash += reward;
-+        bossLevel += 1;
-+        save();
-+        $('#cash').textContent = fmtCash(cash);
-+        $('#fightNote').textContent = `Victory! You earned ${fmtCash(reward)}.`;
-+      } else if (!livingIds().length){
-+        stopFight();
-+        $('#fightNote').textContent = 'Defeat! All allies fell. Click New Boss to revive everyone.';
-       }
--    },tickMs);
-+    }, tickMs);
-   }
- 
-   // === RECRUITING ===
--  function candidatesByTier(t){ return players.filter(p=> p.tier===t && !collectionIds.includes(p.id)); }
--  function rollTier(){ const avail=Object.entries(TIER_WEIGHTS).filter(([t])=> candidatesByTier(t).length>0); if(!avail.length) return null; const total=avail.reduce((a,[,w])=>a+function recruit(){
--    if(!players.length){ alert('No players loaded yet.'); return; }
-+  function recruit(){
-+    if (!players.length){
-+      alert('No players loaded yet.');
-+      return;
-+    }
-     ensureDailyCounters();
-     const cost = currentRecruitCost();
--    if(cost>0 && cash<cost){ alert(`Not enough cash. Roll costs ${fmtCash(cost)}.`); return; }
--    const t = pickTierWithPity(); if(!t){ alert('You already own all available cards!'); return; }
--    const cands = players.filter(p=> p.tier===t && !collectionIds.includes(p.id)); if(!cands.length){ alert('No candidates available in selected tier.'); return; }
--    const p = pick(cands);
--    if(cost>0){ cash = Math.max(0, cash - cost); $('#cash').textContent = fmtCash(cash); }
-+    if (cost>0 && cash < cost){
-+      alert(`Not enough cash. Roll costs ${fmtCash(cost)}.`);
-+      return;
-+    }
-+    const tier = pickTierWithPity();
-+    if (!tier){
-+      alert('You already own every available card!');
-+      return;
-+    }
-+    const candidates = players.filter(p=> p.tier===tier && !collectionIds.includes(p.id));
-+    if (!candidates.length){
-+      alert('No candidates available in that tier.');
-+      return;
-+    }
-+    const card = pick(candidates);
-+    if (cost>0){
-+      cash = Math.max(0, cash - cost);
-+      $('#cash').textContent = fmtCash(cash);
-+    }
-     recruitsToday += 1;
--    addToCollection(p.id);
--    bumpPity(t);
--    save(); updateRecruitCostUI();
--    $('#fightNote').textContent=`Recruited ${p.name} (${t}).`;
--  }; } return avail[avail.length-1][0]; }
--  function recruit(){ if(!players.length){ alert('No players loaded yet.'); return; } if(RECRUIT_COST>0 && cash<RECRUIT_COST){ alert('Not enough cash.'); return; } const t=rollTier(); if(!t){ alert('You already own all available cards!'); return; } const p=pick(candidatesByTier(t)); if(RECRUIT_COST>0){ cash=Math.max(0,cash-RECRUIT_COST); $('#cash').textContent=fmtCash(cash); } addToCollection(p.id); $('#fightNote').textContent=`Recruited ${p.name} (${t}).`; }
-+    addToCollection(card.id);
-+    bumpPity(tier);
-+    save();
-+    updateRecruitCostUI();
-+    $('#fightNote').textContent = `Recruited ${card.name} (${tier}).`;
-+  }
- 
-   // === FREE COMMON ===
--  function handleFreeCommon(){ const f=tiers['F-Tier']?.players||[]; let candidate=f.length?pick(f):null; if(!candidate){ const all=players.map(p=>p.name); if(!all.length) return alert('No players in sheet yet.'); candidate=pick(all); } const p=players.find(x=> x.name===candidate && x.tier==='F-Tier') || players.find(x=> x.name===candidate); if(!p) return alert('Could not find a card to grant.'); if(collectionIds.includes(p.id)){ $('#fightNote').textContent='Common already owned.'; return; } addToCollection(p.id); $('#freasync function boot(){
--    load(); $('#cash').textContent=fmtCash(cash); $('#bossLevel').textContent=bossLevel;
--    $('#fightBtn').onclick=startFight; $('#newBossBtn').onclick=()=>{ if(fighting) return; newBoss(); };
--    $('#freeCardBtn').onclick=handleFreeCommon; $('#recruitBtn').onclick=recruit; $('#resetBtn').onclick=()=>{ if(confirm('Reset local progress?')){ localStorage.clear(); location.reload(); } };
-+  function handleFreeCommon(){
-+    const commons = tiers['F-Tier']?.players || [];
-+    let candidate = commons.length ? pick(commons) : null;
-+    if (!candidate){
-+      const everyone = players.map(p=> p.name);
-+      if (!everyone.length){
-+        alert('No players available to grant yet.');
-+        return;
-+      }
-+      candidate = pick(everyone);
-+    }
-+    const card = players.find(p=> p.name===candidate && p.tier==='F-Tier') || players.find(p=> p.name===candidate);
-+    if (!card){
-+      alert('Could not find a card to grant.');
-+      return;
-+    }
-+    if (collectionIds.includes(card.id)){
-+      $('#fightNote').textContent = 'Common already owned.';
-+      return;
-+    }
-+    addToCollection(card.id);
-+    $('#fightNote').textContent = `Granted ${card.name}!`;
-+    $('#freeCardBtn').style.display = 'none';
-+  }
-+
-+  // === BOOT ===
-+  async function boot(){
-+    load();
-+    $('#cash').textContent = fmtCash(cash);
-+    $('#bossLevel').textContent = bossLevel;
-+    $('#fightBtn').onclick = startFight;
-+    $('#newBossBtn').onclick = ()=>{ if (!fighting) newBoss(); };
-+    $('#freeCardBtn').onclick = handleFreeCommon;
-+    $('#recruitBtn').onclick = recruit;
-+    $('#resetBtn').onclick = ()=>{
-+      if (confirm('Reset local progress?')){
-+        localStorage.clear();
-+        location.reload();
-+      }
-+    };
-     updateRecruitCostUI();
--    try{ const [pTxt,sTxt] = await Promise.all([ fetch(SHEET_PLAYERS_URL).then(r=>r.text()), fetch(SHEET_STATS_URL).then(r=>r.text()) ]); console.debug('[CrowdDPS] Loaded CSVs', {statsBytes:sTxt.length, playersBytes:pTxt.length});
--      buildFromSheets(parseCSV(sTxt), parseCSV(pTxt));
--      console.debug('[CrowdDPS] Built', {tiers, playersCount: players.length}); }
--    catch(e){ console.error(e); $('#playersEmpty').style.display=''; $('#playersEmpty').textContent='Failed to load CSVs. Ensure both links are published and accessible.'; }
--    renderPlayers(); renderTeam(); if(!boss) newBoss(); renderBoss();
--    if(!collectionIds.length) $('#freeCardBtn').style.display=''; else $('#freeCardBtn').style.display='n    if(!collectionIds.length) $('#freeCardBtn').style.display=''; else $('#freeCardBtn').style.display='none';
-+    try{
-+      const [playersCsv, statsCsv] = await Promise.all([
-+        fetch(SHEET_PLAYERS_URL).then(r=> r.text()),
-+        fetch(SHEET_STATS_URL).then(r=> r.text())
-+      ]);
-+      buildFromSheets(parseCSV(statsCsv), parseCSV(playersCsv));
-+    } catch (err){
-+      console.error(err);
-+      const empty = $('#playersEmpty');
-+      if (empty){
-+        empty.style.display='';
-+        empty.textContent = 'Failed to load CSVs. Ensure both links are published and accessible.';
-+      }
-+    }
-+    renderPlayers();
-+    renderTeam();
-+    if (!boss) newBoss(); else renderBoss();
-+    if (!collectionIds.length) $('#freeCardBtn').style.display='';
-+    else $('#freeCardBtn').style.display='none';
-   }
-   boot();
-   </script>
- </body>
- </html>
- 
-EOF
-)
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crowd DPS — Boss Rush</title>
+  <style>
+    :root {
+      --bg:#0b0f14; --panel:#121821; --muted:#8aa0b6; --text:#e9f0f8; --brand:#7cc3ff;
+      --accent:#6bf1c8; --danger:#ff6b6b; --gold:#ffd166; --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans";
+      color:var(--text);
+      background:radial-gradient(1200px 800px at 20% -10%,#112131 0%,var(--bg) 60%),
+                 radial-gradient(1000px 600px at 120% 10%,#182436 0%,transparent 60%),
+                 var(--bg);
+    }
+    header{
+      display:flex;align-items:center;justify-content:space-between;padding:18px 20px;gap:16px;
+      position:sticky;top:0;backdrop-filter:blur(8px);
+      background:linear-gradient(180deg,rgba(10,14,20,.85),rgba(10,14,20,.55));
+      border-bottom:1px solid rgba(255,255,255,.06);z-index:5;
+    }
+    .title{font-weight:800;letter-spacing:.4px}.title span{opacity:.7;font-weight:600}
+    .pill{display:inline-flex;align-items:center;gap:10px;background:#0f1722;border:1px solid rgba(255,255,255,.08);
+      padding:10px 14px;border-radius:999px;box-shadow:var(--shadow);font-weight:600;color:var(--muted)}
+    .pill .value{color:var(--text)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border:1px solid rgba(255,255,255,.1);
+      border-radius:10px;background:linear-gradient(180deg,#1a2332,#121a26);color:var(--text);cursor:pointer;user-select:none;
+      font-weight:700;box-shadow:var(--shadow);transition:transform .05s ease,filter .2s ease,background .2s ease}
+    .btn.small{padding:8px 10px;font-size:12px}
+    .btn:hover{filter:brightness(1.1)}
+    .btn:active{transform:translateY(1px) scale(.99)}
+    .btn.brand{background:linear-gradient(180deg,#2589ff,#1761c8);border-color:#2a66b8}
+    .btn.neon{background:linear-gradient(180deg,#1f3b3b,#142626);border-color:#2e6f68;color:#b7fff0}
+    main{display:grid;gap:18px;padding:18px;max-width:1400px;margin:0 auto;grid-template-columns:1fr minmax(420px,520px) 1fr}
+    @media (max-width:1100px){main{grid-template-columns:1fr}.panel{order:unset!important}}
+    .panel{background:linear-gradient(180deg,#0f1520,#0b1018);border:1px solid rgba(255,255,255,.07);
+      border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;min-height:120px}
+    .panel h2{margin:0 0 10px;font-size:16px;font-weight:800;letter-spacing:.3px;color:var(--muted)}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+    .card{position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(180deg,rgba(22,30,45,.9),rgba(16,20,30,.9));
+      border:1px solid rgba(255,255,255,.05);box-shadow:0 8px 20px rgba(0,0,0,.25);padding:12px;display:grid;gap:10px}
+    .card::before{content:"";position:absolute;inset:-2px;border-radius:16px;padding:1px;
+      background:conic-gradient(from 180deg,rgba(124,195,255,.5),rgba(107,241,200,.45),rgba(255,209,102,.45),rgba(124,195,255,.5));
+      -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+      -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .badge{font-size:11px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);opacity:.9}
+    .badge.tier{font-weight:800;letter-spacing:.4px}
+    .name{font-weight:800;font-size:16px;letter-spacing:.2px}
+    .stat{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--muted);padding:6px 8px;border-radius:8px;
+      border:1px solid rgba(255,255,255,.08);background:#0e1520}
+    .stat .v{color:var(--text)}
+    .hpmini{height:10px;border-radius:999px;background:#0d1320;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+    .hpmini>div{height:100%;background:linear-gradient(90deg,#34d399,#ffd166);width:100%}
+    .ko{color:#ff9aa2;font-weight:800;letter-spacing:.3px}
+    .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .note{color:var(--muted);font-size:12px;margin-top:6px}
+    .empty{color:var(--muted);text-align:center;padding:20px;border:1px dashed rgba(255,255,255,.12);border-radius:12px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">Crowd DPS <span>· Boss Rush</span></div>
+    <div class="toolbar">
+      <div class="pill">Cash: <span class="value" id="cash">$0.00</span></div>
+      <div class="pill">Boss Lvl: <span class="value" id="bossLevel">1</span></div>
+      <div class="pill">Roll Cost: <span class="value" id="rollCost">$0.00</span></div>
+      <button id="resetBtn" class="btn small" title="Reset local progress">Reset</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel" id="allPlayersPanel" style="order:1">
+      <h2>All Players (from Google Sheets)</h2>
+      <div id="players" class="cards"></div>
+      <div id="playersEmpty" class="empty" style="display:none">No players loaded yet.</div>
+      <div class="note">
+        Players sheet: headers A–G = F-Tier→SS-Tier, row 2+ = usernames. Stats sheet: same headers; row 2 = HP per tier; row 3 = DPS per tier.
+      </div>
+    </section>
+
+    <section class="panel" id="bossPanel" style="order:0">
+      <h2>Boss Arena</h2>
+      <div class="boss">
+        <div class="hero">
+          <div class="row" style="justify-content:space-between;align-items:baseline">
+            <div>
+              <div class="name" style="font-size:20px;font-weight:900" id="bossName">—</div>
+              <div class="muted" id="bossStats">HP — / —</div>
+            </div>
+            <div class="badge" id="bossBadge">Level 1</div>
+          </div>
+          <div class="hpmini" style="height:16px"><div id="hpFill" style="width:100%"></div></div>
+          <div class="grid2">
+            <div class="pill">Your DPS: <span class="value" id="yourDPS">0</span></div>
+            <div class="pill">Your HP: <span class="value" id="yourHP">0</span></div>
+          </div>
+          <div class="toolbar">
+            <button id="fightBtn" class="btn brand">Start Fight</button>
+            <button id="newBossBtn" class="btn">New Boss</button>
+            <button id="freeCardBtn" class="btn neon" title="First-time bonus: random F-Tier">Get Free Common Card</button>
+            <button id="recruitBtn" class="btn" title="Roll a random card by rarity">Recruit (Roll)</button>
+          </div>
+          <div class="note" id="fightNote">Win to earn cash. Rewards grow slowly as bosses scale up.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="teamPanel" style="order:2">
+      <h2>Your Team</h2>
+      <div id="team" class="cards"></div>
+      <div id="teamEmpty" class="empty">You have no cards yet.</div>
+    </section>
+  </main>
+
+  <script>
+  // === CONFIG ===
+  const SHEET_PLAYERS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMUnfamouCORKPavgJqVoMsSNDyx-emsTNi5dJw2DNx1IcWnPH
+-I6tgeN9EsAWoLXCUSmWpe5JyfZn/pub?output=csv";
+  const SHEET_STATS_URL   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRgc7Pm81icSxeJP3dySkafpNEyAElWNXiHUgue3wLcNUsanku5
+Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
+
+  const FALLBACK_STATS = {
+    tiers: {
+      "F-Tier": { hp: 120, dps: 6 },
+      "D-Tier": { hp: 160, dps: 10 },
+      "C-Tier": { hp: 210, dps: 16 },
+      "B-Tier": { hp: 280, dps: 24 },
+      "A-Tier": { hp: 360, dps: 36 },
+      "S-Tier": { hp: 450, dps: 54 },
+      "SS-Tier": { hp: 560, dps: 78 }
+    }
+  };
+
+  const FALLBACK_PLAYERS = {
+    "F-Tier": ["PixelPug", "Mossy", "LagBug"],
+    "D-Tier": ["StormKid", "NanoFletch"],
+    "C-Tier": ["EchoFox", "Starling"],
+    "B-Tier": ["ArcDrifter"],
+    "A-Tier": ["Aurora"],
+    "S-Tier": ["Mythic"],
+    "SS-Tier": ["Celestia"]
+  };
+
+  const TIER_ORDER = ["F-Tier","D-Tier","C-Tier","B-Tier","A-Tier","S-Tier","SS-Tier"];
+  const TIER_COLORS = {
+    "F-Tier":"#94a3b8",
+    "D-Tier":"#a78bfa",
+    "C-Tier":"#60a5fa",
+    "B-Tier":"#34d399",
+    "A-Tier":"#facc15",
+    "S-Tier":"#fb7185",
+    "SS-Tier":"#f97316"
+  };
+  const TIER_BASE_WEIGHTS = {"F-Tier":0.45,"D-Tier":0.20,"C-Tier":0.14,"B-Tier":0.09,"A-Tier":0.06,"S-Tier":0.04,"SS-Tier":0.02};
+  const FAIRNESS = {
+    cost: { base: 0.20, perRecruit: 0.02, dailyFree: 1, maxCost: 1.00 },
+    pity: {
+      A:  { softStart: 8,  softStep: 0.15, hard: 20 },
+      S:  { softStart: 20, softStep: 0.20, hard: 45 },
+      SS: { softStart: 40, softStep: 0.25, hard: 80 }
+    }
+  };
+
+  // === UTIL ===
+  const $ = (sel)=> document.querySelector(sel);
+  const el = (tag, props={}, children=[])=>{
+    const node=document.createElement(tag);
+    Object.entries(props).forEach(([k,v])=>{
+      if (k in node) node[k]=v; else node.setAttribute(k,v);
+    });
+    ([]).concat(children).filter(Boolean).forEach(child=> node.append(child));
+    return node;
+  };
+  const clamp = (v,min,max)=> Math.min(max, Math.max(min,v));
+  const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+  const rand = (a,b)=> a + Math.random()*(b-a);
+  const fmtNum = n => Number(n||0).toLocaleString();
+  const fmtCash = n => `$${Number(n||0).toFixed(2)}`;
+  const idFrom = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  const todayKey = ()=> new Date().toISOString().slice(0,10);
+
+  // === STATE ===
+  let tiers = {};
+  let players = [];
+  let collectionIds = [];
+  let teamIds = [];
+  let hpMap = {};
+  let cash = 0;
+  let bossLevel = 1;
+  let boss = null;
+  let pity = {A:0,S:0,SS:0};
+  let recruitsToday = 0;
+  let lastRecruitDay = '';
+  let fighting = false;
+  let fightTimer = null;
+
+  // === PERSISTENCE ===
+  function save(){
+    localStorage.setItem('cdps.cash', String(cash));
+    localStorage.setItem('cdps.bossLevel', String(bossLevel));
+    localStorage.setItem('cdps.collection', JSON.stringify(collectionIds));
+    localStorage.setItem('cdps.pity', JSON.stringify(pity));
+    localStorage.setItem('cdps.recruitsToday', String(recruitsToday));
+    localStorage.setItem('cdps.lastRecruitDay', lastRecruitDay || '');
+    if (boss) localStorage.setItem('cdps.boss', JSON.stringify(boss));
+  }
+  function load(){
+    cash = parseFloat(localStorage.getItem('cdps.cash')||'0')||0;
+    bossLevel = parseInt(localStorage.getItem('cdps.bossLevel')||'1')||1;
+    collectionIds = JSON.parse(localStorage.getItem('cdps.collection')||'[]');
+    recruitsToday = parseInt(localStorage.getItem('cdps.recruitsToday')||'0')||0;
+    lastRecruitDay = localStorage.getItem('cdps.lastRecruitDay')||'';
+    try{ pity = JSON.parse(localStorage.getItem('cdps.pity')||'{"A":0,"S":0,"SS":0}'); }
+    catch{ pity = {A:0,S:0,SS:0}; }
+    try{ boss = JSON.parse(localStorage.getItem('cdps.boss')||'null'); }
+    catch{ boss = null; }
+  }
+
+  // === FAIRNESS HELPERS ===
+  function ensureDailyCounters(){
+    const today = todayKey();
+    if (lastRecruitDay !== today){
+      lastRecruitDay = today;
+      recruitsToday = 0;
+      save();
+    }
+  }
+  function totalRecruits(){ return collectionIds.length; }
+  function currentRecruitCost(){
+    ensureDailyCounters();
+    const freeLeft = Math.max(0, FAIRNESS.cost.dailyFree - recruitsToday);
+    if (freeLeft>0) return 0;
+    const scaled = FAIRNESS.cost.base + FAIRNESS.cost.perRecruit * totalRecruits();
+    return Math.min(FAIRNESS.cost.maxCost, Math.round(scaled*100)/100);
+  }
+  function updateRecruitCostUI(){
+    const elCost = $('#rollCost');
+    if (elCost) elCost.textContent = fmtCash(currentRecruitCost());
+  }
+  function dynamicTierWeights(){
+    const weights = { ...TIER_BASE_WEIGHTS };
+    const {A:PA,S:PS,SS:PSS} = FAIRNESS.pity;
+    if (pity.A >= PA.softStart){
+      const steps = pity.A - PA.softStart + 1;
+      const mult = 1 + PA.softStep*steps;
+      weights['A-Tier']*=mult; weights['S-Tier']*=mult; weights['SS-Tier']*=mult;
+    }
+    if (pity.S >= PS.softStart){
+      const steps = pity.S - PS.softStart + 1;
+      const mult = 1 + PS.softStep*steps;
+      weights['S-Tier']*=mult; weights['SS-Tier']*=mult;
+    }
+    if (pity.SS >= PSS.softStart){
+      const steps = pity.SS - PSS.softStart + 1;
+      const mult = 1 + PSS.softStep*steps;
+      weights['SS-Tier']*=mult;
+    }
+    return weights;
+  }
+  function pickTierWithPity(){
+    const {A:PA,S:PS,SS:PSS} = FAIRNESS.pity;
+    const available = tier => players.some(p=> p.tier===tier && !collectionIds.includes(p.id));
+    if (pity.SS >= PSS.hard && available('SS-Tier')) return 'SS-Tier';
+    if (pity.S >= PS.hard){
+      const t = ['SS-Tier','S-Tier'].find(available);
+      if (t) return t;
+    }
+    if (pity.A >= PA.hard){
+      const t = ['SS-Tier','S-Tier','A-Tier'].find(available);
+      if (t) return t;
+    }
+    const weights = dynamicTierWeights();
+    const pool = Object.entries(weights)
+      .filter(([tier,weight])=> weight>0 && available(tier));
+    if (!pool.length) return null;
+    const total = pool.reduce((sum,[,w])=> sum+w,0);
+    let roll = Math.random()*total;
+    for (const [tier, weight] of pool){
+      roll -= weight;
+      if (roll <= 0) return tier;
+    }
+    return pool[pool.length-1][0];
+  }
+  function bumpPity(tier){
+    if (tier==='SS-Tier'){
+      pity = {A:0,S:0,SS:0};
+    } else if (tier==='S-Tier'){
+      pity.S = 0;
+      pity.A = 0;
+      pity.SS += 1;
+    } else if (tier==='A-Tier'){
+      pity.A = 0;
+      pity.S += 1;
+      pity.SS += 1;
+    } else {
+      pity.A += 1;
+      pity.S += 1;
+      pity.SS += 1;
+    }
+  }
+
+  // === DATA BUILDERS ===
+  function parseCSV(text){
+    if (!text) return [];
+    return text.trim().split(/\r?\n/).map(row=> row.split(',').map(c=> c.replace(/^"|\"$/g,'').trim()));
+  }
+  function mapHeaderToTiers(headers){
+    const canonical = h =>{
+      const k=(h||'').toString().toLowerCase().replace(/[^a-z]/g,'');
+      if (k.includes('ftier')||k==='f') return 'F-Tier';
+      if (k.includes('dtier')||k==='d') return 'D-Tier';
+      if (k.includes('ctier')||k==='c') return 'C-Tier';
+      if (k.includes('btier')||k==='b') return 'B-Tier';
+      if (k.includes('atier')||k==='a') return 'A-Tier';
+      if (k.includes('sstier')||k==='ss') return 'SS-Tier';
+      if (k.includes('stier')||k==='s') return 'S-Tier';
+      return null;
+    };
+    return headers.map(canonical);
+  }
+  function findHeaderRow(matrix){
+    const maxScan = Math.min(5, matrix.length);
+    let bestRow = 0;
+    let bestHits = -1;
+    for (let r=0;r<maxScan;r++){
+      const hits = (matrix[r]||[]).map(h=> mapHeaderToTiers([h])[0]).filter(Boolean).length;
+      if (hits>bestHits){ bestHits = hits; bestRow = r; }
+    }
+    return bestRow;
+  }
+  function buildFromSheets(statsMatrix, playersMatrix){
+    tiers = {};
+    TIER_ORDER.forEach(tier=> tiers[tier] = {hp:100, dps:5, players:[]});
+
+    if (statsMatrix && statsMatrix.length){
+      const start = findHeaderRow(statsMatrix);
+      const headers = statsMatrix[start] || [];
+      const cols = mapHeaderToTiers(headers);
+      const hpRow = statsMatrix[start+1] || [];
+      const dpsRow = statsMatrix[start+2] || [];
+      cols.forEach((tierName, idx)=>{
+        if (!tierName) return;
+        const hp = parseFloat(hpRow[idx]);
+        const dps = parseFloat(dpsRow[idx]);
+        if (!Number.isNaN(hp)) tiers[tierName].hp = hp;
+        if (!Number.isNaN(dps)) tiers[tierName].dps = dps;
+      });
+    }
+
+    if (playersMatrix && playersMatrix.length){
+      const start = findHeaderRow(playersMatrix);
+      const headers = playersMatrix[start] || [];
+      const cols = mapHeaderToTiers(headers);
+      for (let r=start+1;r<playersMatrix.length;r++){
+        const row = playersMatrix[r] || [];
+        for (let c=0;c<row.length;c++){
+          const tier = cols[c];
+          if (!tier) continue;
+          const name = (row[c]||'').trim();
+          if (!name || tiers[tier].players.includes(name)) continue;
+          tiers[tier].players.push(name);
+        }
+      }
+    }
+
+    players = [];
+    for (const tier of TIER_ORDER){
+      const baseHp = tiers[tier].hp;
+      const baseDps = tiers[tier].dps;
+      for (const name of tiers[tier].players){
+        players.push({
+          id: idFrom(`${name}-${tier}`),
+          name,
+          tier,
+          hp: baseHp,
+          dps: baseDps
+        });
+      }
+    }
+  }
+
+  function buildFallbackData(){
+    tiers = {};
+    TIER_ORDER.forEach(tier=>{
+      const fallback = FALLBACK_STATS.tiers[tier] || { hp: 100, dps: 5 };
+      tiers[tier] = { hp: fallback.hp, dps: fallback.dps, players: [...(FALLBACK_PLAYERS[tier] || [])] };
+    });
+    players = [];
+    for (const tier of TIER_ORDER){
+      const { hp, dps } = tiers[tier];
+      tiers[tier].players.forEach(name=>{
+        players.push({
+          id: idFrom(`${name}-${tier}`),
+          name,
+          tier,
+          hp,
+          dps
+        });
+      });
+    }
+  }
+
+  // === RENDER ===
+  function tierBadge(tier){
+    const badge = el('span',{className:'badge tier'});
+    badge.textContent = tier;
+    badge.style.borderColor = TIER_COLORS[tier] || 'rgba(255,255,255,.2)';
+    badge.style.color = TIER_COLORS[tier] || '#cbd5e1';
+    badge.style.background = 'rgba(255,255,255,.05)';
+    return badge;
+  }
+  function playerCard(player, mode){
+    const card = el('div',{className:'card', id:`card-${player.id}`});
+    const top = el('div',{className:'row'});
+    top.append(el('div',{className:'name', textContent:player.name}), tierBadge(player.tier));
+    const stats = el('div',{className:'row'});
+    stats.append(
+      el('div',{className:'stat', innerHTML:`HP <span class="v">${fmtNum(player.hp)}</span>`}),
+      el('div',{className:'stat', innerHTML:`DPS <span class="v">${fmtNum(player.dps)}</span>`})
+    );
+    card.append(top, stats);
+    if (mode==='team'){
+      const hpRow = el('div',{className:'row'});
+      const hpText = el('div',{className:'stat', id:`hptext-${player.id}`});
+      hpText.innerHTML = `HP <span class="v">${fmtNum(hpMap[player.id] ?? player.hp)}</span>`;
+      const bar = el('div',{className:'hpmini'});
+      const fill = el('div',{id:`bar-${player.id}`});
+      bar.append(fill);
+      const status = el('div',{id:`status-${player.id}`, className:'badge', style:'opacity:.8'});
+      hpRow.append(hpText, status);
+      card.append(hpRow, bar);
+    }
+    return card;
+  }
+  function renderPlayers(){
+    const wrap = $('#players');
+    wrap.innerHTML='';
+    if (!players.length){
+      const empty = $('#playersEmpty');
+      if (empty){
+        empty.style.display='';
+        empty.textContent = 'No players parsed. Ensure sheet headers include the tier names and that rows begin at row 2.';
+      }
+      return;
+    }
+    $('#playersEmpty').style.display='none';
+    const grouped = Object.fromEntries(TIER_ORDER.map(t=>[t,[]]));
+    players.forEach(p=> grouped[p.tier].push(p));
+    for (const tier of TIER_ORDER){
+      const list = grouped[tier];
+      if (!list.length) continue;
+      const header = el('div',{className:'card'});
+      header.append(el('div',{className:'name', textContent:`${tier} · ${list.length}` }));
+      wrap.append(header);
+      list.forEach(player=> wrap.append(playerCard(player,'collection')));
+    }
+  }
+  function updateTeamHPUI(){
+    for (const id of teamIds){
+      const player = players.find(p=> p.id===id);
+      if (!player) continue;
+      const currentHp = hpMap[id] ?? player.hp;
+      const pct = clamp((currentHp/player.hp)*100,0,100);
+      const bar = $(`#bar-${id}`);
+      if (bar) bar.style.width = `${pct}%`;
+      const hpText = $(`#hptext-${id}`);
+      if (hpText) hpText.innerHTML = `HP <span class="v">${fmtNum(Math.max(0,currentHp))}</span>`;
+      const status = $(`#status-${id}`);
+      if (status) status.textContent = currentHp<=0 ? 'KO' : '';
+    }
+  }
+  function renderTeam(){
+    teamIds = [...collectionIds];
+    const wrap = $('#team');
+    wrap.innerHTML='';
+    const team = teamIds.map(id=> players.find(p=> p.id===id)).filter(Boolean);
+    if (!team.length){
+      $('#teamEmpty').style.display='';
+    } else {
+      $('#teamEmpty').style.display='none';
+      team.forEach(p=> wrap.append(playerCard(p,'team')));
+    }
+    updateTeamHPUI();
+    const totalDps = team.reduce((sum,p)=> sum + p.dps,0);
+    const totalHp = team.reduce((sum,p)=> sum + (hpMap[p.id] ?? p.hp),0);
+    $('#yourDPS').textContent = fmtNum(totalDps);
+    $('#yourHP').textContent = fmtNum(totalHp);
+    updateRecruitCostUI();
+  }
+
+  // === COLLECTION ===
+  function addToCollection(id){
+    if (!collectionIds.includes(id)) collectionIds.push(id);
+    save();
+    renderPlayers();
+    renderTeam();
+  }
+
+  // === BOSS ===
+  const BOSS_NAMES = ['Rust-Eaten Golem','Gelatinous Overmind','Cave Hydra','Skull Furnace','Storm Djinn','Ancient Treant','Holl
+ow Colossus','Obsidian Wyrm','Clockwork Behemoth','Astral Leech'];
+  function genBoss(level, teamDps=1, teamHp=1){
+    const name = `${pick(BOSS_NAMES)}${level>=10?' [Ω]':''}`;
+    const targetTTK = 18 + level*1.1;
+    const difficulty = 1 + level*0.18;
+    const variance = rand(0.9,1.1);
+    const maxHp = Math.max(50, teamDps * targetTTK * difficulty * variance);
+    const bossDps = Math.max(1, teamHp / (targetTTK*1.1)) * rand(0.9,1.1);
+    return { name, level, maxHp:Math.round(maxHp), hp:Math.round(maxHp), dps:bossDps };
+  }
+  function rewardFor(level){
+    const base = 0.12;
+    const growth = 0.035 * level;
+    const variance = rand(0.95,1.05);
+    return Math.round((base + growth) * variance * 100)/100;
+  }
+  function renderBoss(){
+    if (!boss) return;
+    $('#bossName').textContent = boss.name;
+    $('#bossLevel').textContent = boss.level;
+    $('#bossBadge').textContent = `Level ${boss.level}`;
+    $('#bossStats').textContent = `HP ${Math.ceil(boss.hp)} / ${boss.maxHp}`;
+    $('#hpFill').style.width = `${clamp((boss.hp/boss.maxHp)*100,0,100)}%`;
+  }
+  function newBoss(){
+    const team = teamIds.map(id=> players.find(p=> p.id===id)).filter(Boolean);
+    hpMap = {};
+    team.forEach(p=> hpMap[p.id] = p.hp);
+    const dps = Math.max(1, team.reduce((sum,p)=> sum + p.dps,0));
+    const totalHp = team.reduce((sum,p)=> sum + p.hp,0) || 100;
+    boss = genBoss(bossLevel, dps, totalHp);
+    save();
+    renderBoss();
+    renderTeam();
+    $('#fightNote').textContent = 'A new foe appears!';
+  }
+
+  // === COMBAT ===
+  function livingIds(){
+    return teamIds.filter(id=> (hpMap[id] ?? 0) > 0);
+  }
+  function stopFight(){
+    if (fightTimer) clearInterval(fightTimer);
+    fightTimer = null;
+    fighting = false;
+    $('#fightBtn').disabled = false;
+    $('#newBossBtn').disabled = false;
+  }
+  function startFight(){
+    if (fighting || !boss) return;
+    const team = teamIds.map(id=> players.find(p=> p.id===id)).filter(Boolean);
+    const dps = team.reduce((sum,p)=> sum + p.dps,0);
+    if (dps <= 0){
+      alert('Your team has no DPS. Recruit at least one card.');
+      return;
+    }
+    fighting = true;
+    $('#fightBtn').disabled = true;
+    $('#newBossBtn').disabled = true;
+    const tickMs = 100;
+    fightTimer = setInterval(()=>{
+      boss.hp = Math.max(0, boss.hp - dps * (tickMs/1000));
+      const alive = livingIds();
+      if (alive.length){
+        const target = pick(alive);
+        const baseHp = players.find(p=> p.id===target)?.hp || 0;
+        hpMap[target] = Math.max(0, (hpMap[target] ?? baseHp) - boss.dps*(tickMs/1000));
+      }
+      updateTeamHPUI();
+      renderBoss();
+      if (boss.hp <= 0){
+        stopFight();
+        const reward = rewardFor(boss.level);
+        cash += reward;
+        bossLevel += 1;
+        save();
+        $('#cash').textContent = fmtCash(cash);
+        $('#fightNote').textContent = `Victory! You earned ${fmtCash(reward)}.`;
+      } else if (!livingIds().length){
+        stopFight();
+        $('#fightNote').textContent = 'Defeat! All allies fell. Click New Boss to revive everyone.';
+      }
+    }, tickMs);
+  }
+
+  // === RECRUITING ===
+  function recruit(){
+    if (!players.length){
+      alert('No players loaded yet.');
+      return;
+    }
+    ensureDailyCounters();
+    const cost = currentRecruitCost();
+    if (cost>0 && cash < cost){
+      alert(`Not enough cash. Roll costs ${fmtCash(cost)}.`);
+      return;
+    }
+    const tier = pickTierWithPity();
+    if (!tier){
+      alert('You already own every available card!');
+      return;
+    }
+    const candidates = players.filter(p=> p.tier===tier && !collectionIds.includes(p.id));
+    if (!candidates.length){
+      alert('No candidates available in that tier.');
+      return;
+    }
+    const card = pick(candidates);
+    if (cost>0){
+      cash = Math.max(0, cash - cost);
+      $('#cash').textContent = fmtCash(cash);
+    }
+    recruitsToday += 1;
+    addToCollection(card.id);
+    bumpPity(tier);
+    save();
+    updateRecruitCostUI();
+    $('#fightNote').textContent = `Recruited ${card.name} (${tier}).`;
+  }
+
+  // === FREE COMMON ===
+  function handleFreeCommon(){
+    const commons = tiers['F-Tier']?.players || [];
+    let candidate = commons.length ? pick(commons) : null;
+    if (!candidate){
+      const everyone = players.map(p=> p.name);
+      if (!everyone.length){
+        alert('No players available to grant yet.');
+        return;
+      }
+      candidate = pick(everyone);
+    }
+    const card = players.find(p=> p.name===candidate && p.tier==='F-Tier') || players.find(p=> p.name===candidate);
+    if (!card){
+      alert('Could not find a card to grant.');
+      return;
+    }
+    if (collectionIds.includes(card.id)){
+      $('#fightNote').textContent = 'Common already owned.';
+      return;
+    }
+    addToCollection(card.id);
+    $('#fightNote').textContent = `Granted ${card.name}!`;
+    $('#freeCardBtn').style.display = 'none';
+  }
+
+  // === BOOT ===
+  async function boot(){
+    load();
+    $('#cash').textContent = fmtCash(cash);
+    $('#bossLevel').textContent = bossLevel;
+    $('#fightBtn').onclick = startFight;
+    $('#newBossBtn').onclick = ()=>{ if (!fighting) newBoss(); };
+    $('#freeCardBtn').onclick = handleFreeCommon;
+    $('#recruitBtn').onclick = recruit;
+    $('#resetBtn').onclick = ()=>{
+      if (confirm('Reset local progress?')){
+        localStorage.clear();
+        location.reload();
+      }
+    };
+    updateRecruitCostUI();
+    let loadedFromSheets = false;
+    try{
+      const [playersCsv, statsCsv] = await Promise.all([
+        fetch(SHEET_PLAYERS_URL).then(r=> r.text()),
+        fetch(SHEET_STATS_URL).then(r=> r.text())
+      ]);
+      buildFromSheets(parseCSV(statsCsv), parseCSV(playersCsv));
+      loadedFromSheets = players.length > 0;
+      if (!loadedFromSheets){
+        console.warn('Sheets loaded but no players parsed; falling back to bundled sample roster.');
+      }
+    } catch (err){
+      console.error('Failed to load Google Sheets data:', err);
+    }
+    if (!players.length){
+      buildFallbackData();
+      const empty = $('#playersEmpty');
+      if (empty){
+        empty.style.display='';
+        empty.textContent = loadedFromSheets
+          ? 'Sheets parsed but no players found. Loaded sample roster instead.'
+          : 'Using offline sample roster. Publish the linked sheets to replace this data.';
+      }
+    }
+    renderPlayers();
+    renderTeam();
+    if (!boss) newBoss(); else renderBoss();
+    if (!collectionIds.length) $('#freeCardBtn').style.display='';
+    else $('#freeCardBtn').style.display='none';
+  }
+  boot();
+  </script>
+</body>
+</html>
