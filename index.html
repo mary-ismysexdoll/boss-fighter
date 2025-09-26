@@ -126,22 +126,66 @@
   function parseCSV(text){ return text.trim().split(/
 ?
 /).map(r=> r.split(',').map(c=> c.replace(/^\"|\"$/g,'').trim())); }
-  function mapHeaderToTiers(headers){ return headers.map(h=> TIER_ORDER.find(t=> t.toLowerCase()===(h||'').toString().trim().toLowerCase())||null); }
+  function mapHeaderToTiers(headers){
+    function canonicalTier(h){
+      const k = (h||'').toString().toLowerCase().replace(/[^a-z]/g,'');
+      if (k==='ftier'||k==='f') return 'F-Tier';
+      if (k==='dtier'||k==='d') return 'D-Tier';
+      if (k==='ctier'||k==='c') return 'C-Tier';
+      if (k==='btier'||k==='b') return 'B-Tier';
+      if (k==='atier'||k==='a') return 'A-Tier';
+      if (k==='stier'||k==='s') return 'S-Tier';
+      if (k==='sstier'||k==='ss') return 'SS-Tier';
+      return null;
+    }
+    return headers.map(h=> canonicalTier(h));
+  }
 
   function buildFromSheets(statsMatrix, playersMatrix){
     tiers={}; TIER_ORDER.forEach(t=> tiers[t]={hp:100,dps:5,players:[]});
-    if (statsMatrix && statsMatrix.length>=3){
-      const sCols = mapHeaderToTiers(statsMatrix[0]||[]), hpRow=statsMatrix[1]||[], dpsRow=statsMatrix[2]||[];
-      sCols.forEach((tierName,i)=>{ if(!tierName) return; const hp=parseFloat(hpRow[i]); const dps=parseFloat(dpsRow[i]); if(!Number.isNaN(hp)) tiers[tierName].hp=hp; if(!Number.isNaN(dps)) tiers[tierName].dps=dps; });
+
+    function findHeaderRow(matrix){
+      const maxScan = Math.min(5, matrix.length);
+      let bestRow = 0, bestHits = -1;
+      for (let r=0;r<maxScan;r++){
+        const hits = (matrix[r]||[]).map(h=> (h||'').toString()).filter(h=> mapHeaderToTiers([h])[0]).length;
+        if (hits>bestHits){ bestHits=hits; bestRow=r; }
+      }
+      return bestRow;
     }
-    if (playersMatrix && playersMatrix.length>=2){
-      const pCols = mapHeaderToTiers(playersMatrix[0]||[]);
-      for (let r=1;r<playersMatrix.length;r++){
-        const row=playersMatrix[r];
-        for(let c=0;c<row.length;c++){ const t=pCols[c]; if(!t) continue; const name=(row[c]||'').trim(); if(!name) continue; if(!tiers[t].players.includes(name)) tiers[t].players.push(name); }
+
+    // Stats: row 2=HP, row 3=DPS relative to its header row
+    if (statsMatrix && statsMatrix.length){
+      const sStart = findHeaderRow(statsMatrix);
+      const sHeaders = statsMatrix[sStart] || [];
+      const sCols = mapHeaderToTiers(sHeaders);
+      const hpRow = statsMatrix[sStart+1] || [];
+      const dpsRow = statsMatrix[sStart+2] || [];
+      sCols.forEach((tierName,i)=>{
+        if(!tierName) return;
+        const hp=parseFloat(hpRow[i]); const dps=parseFloat(dpsRow[i]);
+        if(!Number.isNaN(hp)) tiers[tierName].hp=hp;
+        if(!Number.isNaN(dps)) tiers[tierName].dps=dps;
+      });
+    }
+
+    // Players: from header row + 1 onward are names
+    if (playersMatrix && playersMatrix.length){
+      const pStart = findHeaderRow(playersMatrix);
+      const pHeaders = playersMatrix[pStart] || [];
+      const pCols = mapHeaderToTiers(pHeaders);
+      for (let r=pStart+1;r<playersMatrix.length;r++){
+        const row=playersMatrix[r]||[];
+        for(let c=0;c<row.length;c++){
+          const t=pCols[c]; if(!t) continue;
+          const name=(row[c]||'').trim(); if(!name) continue;
+          if(!tiers[t].players.includes(name)) tiers[t].players.push(name);
+        }
       }
     }
-    players=[]; for(const t of TIER_ORDER){ const baseHp=tiers[t].hp, baseDps=tiers[t].dps; for(const name of tiers[t].players){ players.push({id:idFrom(name+"-"+t), name, tier:t, hp:baseHp, dps:baseDps}); } }
+
+    players=[];
+    for(const t of TIER_ORDER){ const baseHp=tiers[t].hp, baseDps=tiers[t].dps; for(const name of tiers[t].players){ players.push({id:idFrom(name+"-"+t), name, tier:t, hp:baseHp, dps:baseDps}); } }
   }
 
   // === RENDER ===
@@ -166,7 +210,12 @@
   }
 
   function renderPlayers(){
-    const wrap=$('#players'); wrap.innerHTML=''; if(!players.length){ $('#playersEmpty').style.display=''; return; } $('#playersEmpty').style.display='none';
+    const wrap=$('#players'); wrap.innerHTML=''; if(!players.length){
+      const msg = 'No players parsed. Check: 1) Players sheet headers include F/D/C/B/A/S/SS (any style), 2) Usernames start on row 2, 3) Stats sheet row 2=HP row 3=DPS.';
+      const empty = $('#playersEmpty'); if (empty){ empty.style.display=''; empty.textContent = msg; }
+      console.debug('[CrowdDPS] Players empty. Inspect headers/rows.');
+      return;
+    } $('#playersEmpty').style.display='none';
     const grouped=Object.fromEntries(TIER_ORDER.map(t=>[t,[]])); players.forEach(p=> grouped[p.tier].push(p));
     for(const t of TIER_ORDER){ const list=grouped[t]; if(!list.length) continue; const header=el('div',{className:'card'}); const row=el('div',{className:'row'}); row.append(el('div',{className:'name',textContent:`${t} · ${list.length}`}), tierBadge(t)); header.append(row); wrap.append(header); list.forEach(p=> wrap.append(playerCard(p,'info'))); }
   }
@@ -235,7 +284,9 @@
   async function boot(){
     load(); $('#cash').textContent=fmtCash(cash); $('#bossLevel').textContent=bossLevel;
     $('#fightBtn').onclick=startFight; $('#newBossBtn').onclick=()=>{ if(fighting) return; newBoss(); }; $('#freeCardBtn').onclick=handleFreeCommon; $('#recruitBtn').onclick=recruit; $('#resetBtn').onclick=()=>{ if(confirm('Reset local progress?')){ localStorage.clear(); location.reload(); } };
-    try{ const [pTxt,sTxt] = await Promise.all([ fetch(SHEET_PLAYERS_URL).then(r=>r.text()), fetch(SHEET_STATS_URL).then(r=>r.text()) ]); buildFromSheets(parseCSV(sTxt), parseCSV(pTxt)); }
+    try{ const [pTxt,sTxt] = await Promise.all([ fetch(SHEET_PLAYERS_URL).then(r=>r.text()), fetch(SHEET_STATS_URL).then(r=>r.text()) ]); console.debug('[CrowdDPS] Loaded CSVs', {statsBytes:sTxt.length, playersBytes:pTxt.length});
+      buildFromSheets(parseCSV(sTxt), parseCSV(pTxt));
+      console.debug('[CrowdDPS] Built', {tiers, playersCount: players.length}); }
     catch(e){ console.error(e); $('#playersEmpty').style.display=''; $('#playersEmpty').textContent='Failed to load CSVs. Ensure both links are published and accessible.'; }
     renderPlayers(); renderTeam(); if(!boss) newBoss(); renderBoss();
     // Show free card gate if fresh
