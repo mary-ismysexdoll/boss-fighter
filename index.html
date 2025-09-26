@@ -123,10 +123,8 @@
 
   <script>
   // === CONFIG ===
-  const SHEET_PLAYERS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMUnfamouCORKPavgJqVoMsSNDyx-emsTNi5dJw2DNx1IcWnPH
--I6tgeN9EsAWoLXCUSmWpe5JyfZn/pub?output=csv";
-  const SHEET_STATS_URL   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRgc7Pm81icSxeJP3dySkafpNEyAElWNXiHUgue3wLcNUsanku5
-Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
+  const SHEET_PLAYERS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMUnfamouCORKPavgJqVoMsSNDyx-emsTNi5dJw2DNx1IcWnPH-I6tgeN9EsAWoLXCUSmWpe5JyfZn/pub?output=csv";
+  const SHEET_STATS_URL   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRgc7Pm81icSxeJP3dySkafpNEyAElWNXiHUgue3wLcNUsanku5Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
 
   const FALLBACK_STATS = {
     tiers: {
@@ -216,7 +214,7 @@ Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
   function load(){
     cash = parseFloat(localStorage.getItem('cdps.cash')||'0')||0;
     bossLevel = parseInt(localStorage.getItem('cdps.bossLevel')||'1')||1;
-    collectionIds = JSON.parse(localStorage.getItem('cdps.collection')||'[]');
+    collectionIds = Array.from(new Set(JSON.parse(localStorage.getItem('cdps.collection')||'[]')));
     recruitsToday = parseInt(localStorage.getItem('cdps.recruitsToday')||'0')||0;
     lastRecruitDay = localStorage.getItem('cdps.lastRecruitDay')||'';
     try{ pity = JSON.parse(localStorage.getItem('cdps.pity')||'{"A":0,"S":0,"SS":0}'); }
@@ -311,7 +309,43 @@ Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
   // === DATA BUILDERS ===
   function parseCSV(text){
     if (!text) return [];
-    return text.trim().split(/\r?\n/).map(row=> row.split(',').map(c=> c.replace(/^"|\"$/g,'').trim()));
+    const rows = [];
+    let current = [];
+    let value = '';
+    let inQuotes = false;
+    for (let i=0;i<text.length;i++){
+      const ch = text[i];
+      if (ch === '\r') continue;
+      if (ch === '"'){
+        if (inQuotes && text[i+1] === '"'){
+          value += '"';
+          i += 1;
+        } else {
+          inQuotes = !inQuotes;
+        }
+        continue;
+      }
+      if (ch === ',' && !inQuotes){
+        current.push(value.trim());
+        value = '';
+        continue;
+      }
+      if (ch === '\n' && !inQuotes){
+        current.push(value.trim());
+        rows.push(current);
+        current = [];
+        value = '';
+        continue;
+      }
+      value += ch;
+    }
+    if (value.length || current.length){
+      current.push(value.trim());
+    }
+    if (current.length){
+      rows.push(current);
+    }
+    return rows;
   }
   function mapHeaderToTiers(headers){
     const canonical = h =>{
@@ -336,6 +370,16 @@ Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
       if (hits>bestHits){ bestHits = hits; bestRow = r; }
     }
     return bestRow;
+  }
+  function createPlayerRecord(name, tier, hp, dps, usedIds){
+    const base = idFrom(`${name}-${tier}`) || `player-${tier.toLowerCase()}`;
+    let candidate = base;
+    let suffix = 2;
+    while (usedIds.has(candidate)){
+      candidate = `${base}-${suffix++}`;
+    }
+    usedIds.add(candidate);
+    return { id:candidate, name, tier, hp, dps };
   }
   function buildFromSheets(statsMatrix, playersMatrix){
     tiers = {};
@@ -373,17 +417,12 @@ Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
     }
 
     players = [];
+    const usedIds = new Set();
     for (const tier of TIER_ORDER){
       const baseHp = tiers[tier].hp;
       const baseDps = tiers[tier].dps;
       for (const name of tiers[tier].players){
-        players.push({
-          id: idFrom(`${name}-${tier}`),
-          name,
-          tier,
-          hp: baseHp,
-          dps: baseDps
-        });
+        players.push(createPlayerRecord(name, tier, baseHp, baseDps, usedIds));
       }
     }
   }
@@ -395,16 +434,11 @@ Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
       tiers[tier] = { hp: fallback.hp, dps: fallback.dps, players: [...(FALLBACK_PLAYERS[tier] || [])] };
     });
     players = [];
+    const usedIds = new Set();
     for (const tier of TIER_ORDER){
       const { hp, dps } = tiers[tier];
       tiers[tier].players.forEach(name=>{
-        players.push({
-          id: idFrom(`${name}-${tier}`),
-          name,
-          tier,
-          hp,
-          dps
-        });
+        players.push(createPlayerRecord(name, tier, hp, dps, usedIds));
       });
     }
   }
@@ -498,16 +532,38 @@ Q8NeigfuBA_BaYOokiKaltSe7g1z/pub?output=csv";
   }
 
   // === COLLECTION ===
+  function pruneCollection(){
+    const available = new Set(players.map(p=> p.id));
+    const seen = new Set();
+    const filtered = [];
+    let changed = false;
+    for (const id of collectionIds){
+      if (!available.has(id)){
+        changed = true;
+        continue;
+      }
+      if (seen.has(id)){
+        changed = true;
+        continue;
+      }
+      seen.add(id);
+      filtered.push(id);
+    }
+    if (changed){
+      collectionIds = filtered;
+    }
+    return changed;
+  }
   function addToCollection(id){
     if (!collectionIds.includes(id)) collectionIds.push(id);
+    pruneCollection();
     save();
     renderPlayers();
     renderTeam();
   }
 
   // === BOSS ===
-  const BOSS_NAMES = ['Rust-Eaten Golem','Gelatinous Overmind','Cave Hydra','Skull Furnace','Storm Djinn','Ancient Treant','Holl
-ow Colossus','Obsidian Wyrm','Clockwork Behemoth','Astral Leech'];
+  const BOSS_NAMES = ['Rust-Eaten Golem','Gelatinous Overmind','Cave Hydra','Skull Furnace','Storm Djinn','Ancient Treant','Hollow Colossus','Obsidian Wyrm','Clockwork Behemoth','Astral Leech'];
   function genBoss(level, teamDps=1, teamHp=1){
     const name = `${pick(BOSS_NAMES)}${level>=10?' [Ω]':''}`;
     const targetTTK = 18 + level*1.1;
@@ -694,6 +750,8 @@ ow Colossus','Obsidian Wyrm','Clockwork Behemoth','Astral Leech'];
       }
     }
     renderPlayers();
+    const pruned = pruneCollection();
+    if (pruned) save();
     renderTeam();
     if (!boss) newBoss(); else renderBoss();
     if (!collectionIds.length) $('#freeCardBtn').style.display='';
